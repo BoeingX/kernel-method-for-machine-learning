@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import fmin_l_bfgs_b, fmin_slsqp, minimize
+from scipy.optimize import fmin_l_bfgs_b, fmin_slsqp, minimize, fminbound
 from sklearn.multiclass import OneVsRestClassifier
 from base import Base
 from helper import binarize, pdist, cdist
@@ -18,6 +18,12 @@ class binarySVM(Base):
 
     def _f_grad(self, alpha, K, y):
         return -2*(y - np.dot(K, alpha))
+
+    def _find_b(self, alpha, K, y):
+        b = 0
+        f = lambda x: np.mean(np.maximum(np.zeros_like(y), np.ones_like(y) - np.multiply(y, x + np.dot(K, alpha))))
+        b = fmin_l_bfgs_b(f, b, approx_grad=True)
+        return b
 
     def fit(self, X, y):
         self.X = X
@@ -49,7 +55,8 @@ class binarySVM(Base):
         jac = lambda x: self._f_grad(x, K, y)
         self.alphas = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, tol = self.tol)['x']
         fs = np.dot(K, self.alphas)
-        self.bs = -0.5*(np.take(fs, np.where(y == -1)).max() + np.take(fs, np.where(y == 1)).min())
+        self.bs = -0.5*(np.take(fs, np.where(y == -1)).max() +
+                        np.take(fs, np.where(y == 1)).min())
         self._is_fitted = True
 
     def decision_function(self, X):
