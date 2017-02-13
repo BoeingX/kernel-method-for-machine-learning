@@ -24,11 +24,11 @@ class binarySVM(Base):
         y = binarize(y)[:, 1]
         n_classes = len(np.unique(y))
         assert n_classes == 2
-        n_samples = len(X)
+        n_samples, n_features = X.shape
         if self.gamma == 'auto':
-            self.gamma = 1.0 / n_classes
+            self.gamma = 1.0 / n_features
         if self.kernel == 'rbf':
-            self.f = lambda x, y: np.exp(-np.sum(np.square(x-y))*(self.gamma**2))
+            self.f = lambda x, y: np.exp(-np.sum(np.square(x-y))*self.gamma)
         elif self.kernel == 'linear':
             self.f = lambda x, y: np.dot(x, y)
         else:
@@ -47,7 +47,7 @@ class binarySVM(Base):
                 )
         func = lambda x: self._f(x, K, y)
         jac = lambda x: self._f_grad(x, K, y)
-        self.alphas = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons)['x']
+        self.alphas = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, tol = self.tol)['x']
         fs = np.dot(K, self.alphas)
         self.bs = -0.5*(np.take(fs, np.where(y == -1)).max() + np.take(fs, np.where(y == 1)).min())
         self._is_fitted = True
@@ -55,7 +55,7 @@ class binarySVM(Base):
     def decision_function(self, X):
         K = cdist(self.X, X, self.f)
         y = np.sign(np.dot(self.alphas, K) + self.bs).squeeze()
-        #y = np.asarray(map(lambda x: x if x > 0 else 0, y), dtype = int)
+        y = np.asarray(map(lambda x: x if x > 0 else 0, y), dtype = int)
         return y
 
     def predict(self, X):
@@ -83,11 +83,11 @@ class SVM(Base):
     def fit(self, X, y):
         self.X = X
         n_classes = len(np.unique(y))
-        n_samples = len(X)
+        n_samples, n_features = X.shape
         if self.gamma == 'auto':
-            self.gamma = 1.0 / n_classes
+            self.gamma = 1.0 / n_features
         if self.kernel == 'rbf':
-            self.f = lambda x, y: np.exp(-np.sum(np.square(x-y))*(self.gamma**2))
+            self.f = lambda x, y: np.exp(-np.sum(np.square(x-y))*self.gamma)
         elif self.kernel == 'linear':
             self.f = lambda x, y: np.dot(x, y)
         else:
@@ -100,7 +100,6 @@ class SVM(Base):
             else:
                 bounds[j] = (-self.C, 0)
         y_bin = binarize(y)
-        print y_bin.shape
         self.alphas = np.empty((n_classes, n_samples))
         self.bs = np.empty(n_classes)
         cons = ({'type': 'eq',
@@ -121,7 +120,6 @@ class SVM(Base):
             alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons)
             self.alphas[i] = alpha['x']
             fs = np.dot(K, self.alphas[i])
-            print fs
             self.bs[i] = -0.5*(np.take(fs, np.where(yi == -1)).max() + np.take(fs, np.where(yi == 1)).min())
         self._is_fitted = True
 

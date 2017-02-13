@@ -10,10 +10,10 @@ from sklearn.svm import SVC
 
 if __name__ == '__main__':
     X, y = make_classification(n_samples=100, n_informative=10, n_classes = 2, random_state=0)
-    svm = SVM(kernel = 'linear')
+    svm = binarySVM(kernel = 'rbf', tol = 1e-10, gamma = 0.1)
     svm.fit(X, y)
-    print svm.predict(X)
+    a = np.sort(np.asarray(filter(lambda x: abs(x) > 1e-10, svm.alphas)))
 
-    svc = SVC(kernel='linear')
+    svc = SVC(kernel='rbf', gamma = 0.1)
     svc.fit(X, y)
-    print svc.predict(X)
+    b = np.sort(svc.dual_coef_[0])
