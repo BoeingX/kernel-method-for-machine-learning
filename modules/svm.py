@@ -22,7 +22,7 @@ class binarySVM(Base):
     def _find_b(self, alpha, K, y):
         b = 0
         f = lambda x: np.mean(np.maximum(np.zeros_like(y), np.ones_like(y) - np.multiply(y, x + np.dot(K, alpha))))
-        b = fmin_l_bfgs_b(f, b, approx_grad=True)
+        b, _, _ = fmin_l_bfgs_b(f, b, approx_grad=True)
         return b
 
     def fit(self, X, y):
@@ -55,8 +55,7 @@ class binarySVM(Base):
         jac = lambda x: self._f_grad(x, K, y)
         self.alphas = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, tol = self.tol)['x']
         fs = np.dot(K, self.alphas)
-        self.bs = -0.5*(np.take(fs, np.where(y == -1)).max() +
-                        np.take(fs, np.where(y == 1)).min())
+        self.bs = self._find_b(self.alphas, K, y)
         self._is_fitted = True
 
     def decision_function(self, X):
@@ -71,7 +70,7 @@ class binarySVM(Base):
         return self.decision_function(X)
 
 
-class SVM(Base):
+class SVM(binarySVM):
     """Kernel SVM
     """
     def __init__(self, C = 1.0, gamma = 'auto', kernel = 'rbf', tol = 0.001):
@@ -80,12 +79,6 @@ class SVM(Base):
         self.kernel = kernel
         self.tol = tol
         self._is_fitted = False
-
-    def _f(self, alpha, K, y):
-        return -(2*np.dot(alpha, y) - np.dot(alpha, np.dot(K, alpha)))
-
-    def _f_grad(self, alpha, K, y):
-        return -2*(y - np.dot(K, alpha))
 
     def fit(self, X, y):
         self.X = X
@@ -126,8 +119,7 @@ class SVM(Base):
             alpha = np.zeros(n_samples)
             alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons)
             self.alphas[i] = alpha['x']
-            fs = np.dot(K, self.alphas[i])
-            self.bs[i] = -0.5*(np.take(fs, np.where(yi == -1)).max() + np.take(fs, np.where(yi == 1)).min())
+            self.bs[i] = self._find_b(alpha['x'], K, yi)
         self._is_fitted = True
 
     def predict(self, X):
