@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.datasets import make_classification
 sys.path.append('modules')
 from svm import SVM, binarySVM
-from helper import binarize, pdist, preview, load_label, load_image
+from helper import binarize, pdist, preview, load_label, load_image, save_label
 from sklearn.svm import SVC
 
 def test_svm():
@@ -22,9 +22,11 @@ def test_svm():
     print svc.intercept_
 
 def test_io():
-    X_train = load_image('data/Xtr.csv')
+    #X_train = load_image('data/Xtr.csv')
+    #preview(X_train)
     #X_test = load_image('data/Xte.csv')
-    #y_train = load_label('data/Ytr.csv')
-    preview(X_train)
+    y_train = load_label('data/Ytr.csv')
+    save_label(y_train, 'data/Yte.csv')
+
 if __name__ == '__main__':
     test_io()

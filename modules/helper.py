@@ -70,3 +70,12 @@ def load_image(filename, grayscale = True, max_rows = None):
 def load_label(filename):
     y = np.genfromtxt(filename, delimiter=',', skip_header=1)[:, 1]
     return y
+
+def save_label(y, filename):
+    n_samples = len(y)
+    ids = np.asarray(range(1, n_samples + 1))
+    Yte = np.empty((n_samples, 2))
+    Yte[:, 0] = ids
+    Yte[:, 1] = y
+    with open(filename, 'w') as f:
+        np.savetxt(f, Yte, '%d', delimiter = ',', newline = '\n', header = 'Id,Prediction', comments = '')
