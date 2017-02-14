@@ -1,8 +1,20 @@
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b, fmin_slsqp, minimize, fminbound
-from sklearn.multiclass import OneVsRestClassifier
 from base import Base
 from helper import binarize, pdist, cdist
+
+def _f(alpha, K, y):
+    return -(2*np.dot(alpha, y) - np.dot(alpha, np.dot(K, alpha)))
+
+def _f_grad(alpha, K, y):
+    return -2*(y - np.dot(K, alpha))
+
+def _find_b(alpha, K, y):
+    b = 0
+    f = lambda x: np.mean(np.maximum(np.zeros_like(y), np.ones_like(y) - np.multiply(y, x + np.dot(K, alpha))))
+    b, _, _ = fmin_l_bfgs_b(f, b, approx_grad=True)
+    return b
+
 class binarySVM(Base):
     """Kernel SVM
     """
@@ -13,17 +25,6 @@ class binarySVM(Base):
         self.tol = tol
         self._is_fitted = False
 
-    def _f(self, alpha, K, y):
-        return -(2*np.dot(alpha, y) - np.dot(alpha, np.dot(K, alpha)))
-
-    def _f_grad(self, alpha, K, y):
-        return -2*(y - np.dot(K, alpha))
-
-    def _find_b(self, alpha, K, y):
-        b = 0
-        f = lambda x: np.mean(np.maximum(np.zeros_like(y), np.ones_like(y) - np.multiply(y, x + np.dot(K, alpha))))
-        b, _, _ = fmin_l_bfgs_b(f, b, approx_grad=True)
-        return b
 
     def fit(self, X, y):
         self.X = X
@@ -51,11 +52,10 @@ class binarySVM(Base):
                  'fun': lambda x: np.sum(x),
                  'jac': lambda x: np.ones_like(x)}
                 )
-        func = lambda x: self._f(x, K, y)
-        jac = lambda x: self._f_grad(x, K, y)
+        func = lambda x: _f(x, K, y)
+        jac = lambda x: _f_grad(x, K, y)
         self.alphas = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, tol = self.tol)['x']
-        fs = np.dot(K, self.alphas)
-        self.bs = self._find_b(self.alphas, K, y)
+        self.bs = _find_b(self.alphas, K, y)
         self._is_fitted = True
 
     def decision_function(self, X):
@@ -70,15 +70,29 @@ class binarySVM(Base):
         return self.decision_function(X)
 
 
-class SVM(binarySVM):
+class SVM(Base):
     """Kernel SVM
     """
+    #TODO: sparse representation of alpha
+
     def __init__(self, C = 1.0, gamma = 'auto', kernel = 'rbf', tol = 0.001):
         self.C = C
         self.gamma = gamma
         self.kernel = kernel
         self.tol = tol
         self._is_fitted = False
+
+    def _f(self, alpha, K, y):
+        return -(2*np.dot(alpha, y) - np.dot(alpha, np.dot(K, alpha)))
+
+    def _f_grad(self, alpha, K, y):
+        return -2*(y - np.dot(K, alpha))
+
+    def _find_b(self, alpha, K, y):
+        b = 0
+        f = lambda x: np.mean(np.maximum(np.zeros_like(y), np.ones_like(y) - np.multiply(y, x + np.dot(K, alpha))))
+        b, _, _ = fmin_l_bfgs_b(f, b, approx_grad=True)
+        return b
 
     def fit(self, X, y):
         self.X = X
@@ -108,8 +122,8 @@ class SVM(binarySVM):
                 )
         for i in xrange(n_classes):
             yi = y_bin[:, i]
-            func = lambda x: self._f(x, K, yi)
-            jac = lambda x: self._f_grad(x, K, yi)
+            func = lambda x: _f(x, K, yi)
+            jac = lambda x: _f_grad(x, K, yi)
             bounds = [(None, None)] * n_samples
             for j in xrange(n_samples):
                 if yi[j] == 1:
@@ -119,13 +133,13 @@ class SVM(binarySVM):
             alpha = np.zeros(n_samples)
             alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons)
             self.alphas[i] = alpha['x']
-            self.bs[i] = self._find_b(alpha['x'], K, yi)
+            self.bs[i] = _find_b(alpha['x'], K, yi)
         self._is_fitted = True
 
     def predict(self, X):
         if not self._is_fitted:
             print '[Warning] Classifier is not yet fitted.'
-        K = cdist(self.X, X, self.f)
+        K = cdist(self.X, b, self.f)
         fs = np.dot(self.alphas, K)
         fs += np.multiply(self.bs.reshape(-1, 1), np.ones_like(fs))
         y = np.argmax(fs, axis = 0)
