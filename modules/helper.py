@@ -46,16 +46,22 @@ def preview(X, size = 9):
     # TODO: fix imgs, choice only take 1d array
     idxs = np.random.choice(len(X), size = size, replace = False)
     for i, idx in enumerate(idxs):
+        img = X[idx]
+        if X[idx].ndim == 1:
+            n_dim = np.int(np.sqrt(len(X[idx])))
+            img = img.reshape(n_dim, n_dim)
         plt.subplot(width, width, i+1)
-        n_dim = np.int(np.sqrt(len(X[idx])))
-        plt.imshow(X[idx].reshape(n_dim, -1), cmap=plt.cm.binary)
+        plt.imshow(img, cmap=plt.cm.binary)
         plt.axis('off')
     plt.tight_layout()
     plt.show()
 
 # Data IO
 def load_image(filename, grayscale = True, max_rows = None):
-    X = np.genfromtxt(filename, delimiter=',', max_rows = max_rows)[:, :-1]
+    if max_rows == 1:
+        X = np.genfromtxt(filename, delimiter=',', max_rows = max_rows)[:-1]
+    else:
+        X = np.genfromtxt(filename, delimiter=',', max_rows = max_rows)[:, :-1]
     n_images, n_channels = X.shape
     n_dim = n_channels / 3
     if grayscale:
@@ -79,3 +85,10 @@ def save_label(y, filename):
     Yte[:, 1] = y
     with open(filename, 'w') as f:
         np.savetxt(f, Yte, '%d', delimiter = ',', newline = '\n', header = 'Id,Prediction', comments = '')
+
+def train_test_split(X, y, test_ratio = 0.1):
+    n_test = np.int(len(X) * test_ratio)
+    idx_test = set(np.random.choice(len(X), n_test, replace = False))
+    idx_train = filter(lambda x: x not in idx_test, xrange(len(X)))
+    idx_test = list(idx_test)
+    return X[idx_train, :], y[idx_train], X[idx_test, :], y[idx_test]

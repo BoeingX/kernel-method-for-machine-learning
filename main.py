@@ -22,9 +22,8 @@ def test_svm():
     print svc.intercept_
 
 def test_io():
-    #X_train = load_image('data/Xtr.csv')
-    #preview(X_train)
-    #X_test = load_image('data/Xte.csv')
+    X_train = load_image('data/Xtr.csv')
+    X_test = load_image('data/Xte.csv')
     y_train = load_label('data/Ytr.csv')
     save_label(y_train, 'data/Yte.csv')
 
