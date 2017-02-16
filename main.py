@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.datasets import make_classification
 sys.path.append('modules')
 from svm import SVM, binarySVM
-from helper import binarize, pdist, preview, load_label, load_image, save_label
+from helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec
 from mycv import hog
 
 def test_svm():
@@ -26,13 +26,6 @@ def test_io():
     X_test = load_image('data/Xte.csv')
     y_train = load_label('data/Ytr.csv')
     save_label(y_train, 'data/Yte.csv')
-
-def img2vec(X, transformer):
-    fds = np.empty((len(X), 128))
-    for i, img in enumerate(X):
-        fd = transformer(img)
-        fds[i] = fd
-    return fds
 
 def submission():
     print '[INFO] Loading data'

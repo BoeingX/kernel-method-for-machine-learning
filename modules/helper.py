@@ -30,8 +30,11 @@ def cdist(X, Y, f):
     for i in xrange(n1):
         for j in xrange(i, n2):
             d = f(X[i], Y[j])
-            K[i, j] = d
-            K[j, i] = d
+            try:
+                K[i, j] = d
+                K[j, i] = d
+            except:
+                pass
     return K
 
 def rgb2grayscale(R, G, B):
@@ -92,3 +95,11 @@ def train_test_split(X, y, test_ratio = 0.1):
     idx_train = filter(lambda x: x not in idx_test, xrange(len(X)))
     idx_test = list(idx_test)
     return X[idx_train, :], y[idx_train], X[idx_test, :], y[idx_test]
+
+def img2vec(X, transformer, length = 128):
+    fds = np.empty((len(X), length))
+    for i, img in enumerate(X):
+        fd = transformer(img)
+        fds[i] = fd
+    return fds
+

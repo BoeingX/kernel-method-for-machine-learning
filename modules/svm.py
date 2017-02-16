@@ -74,7 +74,7 @@ class SVM(Base):
     """Kernel SVM
     """
     #TODO: sparse representation of alpha
-
+    #TODO: multiprocessing support for fitting
     def __init__(self, C = 1.0, gamma = 'auto', kernel = 'rbf', tol = 0.001):
         self.C = C
         self.gamma = gamma
@@ -132,7 +132,7 @@ class SVM(Base):
                 else:
                     bounds[j] = (-self.C, 0)
             alpha = np.zeros(n_samples)
-            alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons)
+            alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, options={'disp': True})
             self.alphas[i] = alpha['x']
             self.bs[i] = _find_b(alpha['x'], K, yi)
         self._is_fitted = True
