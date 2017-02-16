@@ -2,6 +2,18 @@ import numpy as np
 from scipy.optimize import fmin_l_bfgs_b, fmin_slsqp, minimize, fminbound
 from base import Base
 from helper import binarize, pdist, cdist
+from cvxopt import matrix, solvers
+
+def prepare_input_for_cvxopt(K, y, C, n):
+    P = 2*matrix(K, tc = 'd')
+    q = -2*matrix(y, tc = 'd')
+    G1 = np.diag(y)
+    G2 = np.diag(-y)
+    G = matrix(np.concatenate((G1, G2), axis = 0), tc = 'd')
+    h = matrix(np.concatenate((C*np.ones(n), np.zeros(n))), tc = 'd')
+    A = matrix(np.ones((1, n)), tc = 'd')
+    b = matrix(np.asarray([0]), tc = 'd')
+    return P, q, G, h, A, b
 
 def _f(alpha, K, y):
     return -(2*np.dot(alpha, y) - np.dot(alpha, np.dot(K, alpha)))
@@ -107,34 +119,39 @@ class SVM(Base):
         else:
             pass
         K = pdist(X, self.f)
-        bounds = [(None, None)] * n_samples
-        for j in xrange(n_samples):
-            if y[j] == 1:
-                bounds[j] = (0, self.C)
-            else:
-                bounds[j] = (-self.C, 0)
         y_bin = binarize(y)
         self.alphas = np.empty((n_classes, n_samples))
         self.bs = np.empty(n_classes)
-        cons = ({'type': 'eq',
-                 'fun': lambda x: np.sum(x),
-                 'jac': lambda x: np.ones_like(x)}
-                )
+        #bounds = [(None, None)] * n_samples
+        #for j in xrange(n_samples):
+        #    if y[j] == 1:
+        #        bounds[j] = (0, self.C)
+        #    else:
+        #        bounds[j] = (-self.C, 0)
+        #cons = ({'type': 'eq',
+        #         'fun': lambda x: np.sum(x),
+        #         'jac': lambda x: np.ones_like(x)}
+        #        )
         for i in xrange(n_classes):
             print '[INFO] fitting class %d' % (i+1)
             yi = y_bin[:, i]
-            func = lambda x: _f(x, K, yi)
-            jac = lambda x: _f_grad(x, K, yi)
-            bounds = [(None, None)] * n_samples
-            for j in xrange(n_samples):
-                if yi[j] == 1:
-                    bounds[j] = (0, self.C)
-                else:
-                    bounds[j] = (-self.C, 0)
-            alpha = np.zeros(n_samples)
-            alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, options={'disp': True})
-            self.alphas[i] = alpha['x']
-            self.bs[i] = _find_b(alpha['x'], K, yi)
+            #func = lambda x: _f(x, K, yi)
+            #jac = lambda x: _f_grad(x, K, yi)
+            #bounds = [(None, None)] * n_samples
+            #for j in xrange(n_samples):
+            #    if yi[j] == 1:
+            #        bounds[j] = (0, self.C)
+            #    else:
+            #        bounds[j] = (-self.C, 0)
+            #alpha = np.zeros(n_samples)
+            #alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, options={'disp': True})
+            #self.alphas[i] = alpha['x']
+            #self.bs[i] = _find_b(alpha['x'], K, yi)
+            P, q, G, h, A, b  = prepare_input_for_cvxopt(K, yi, self.C, len(yi))
+            sol = solvers.qp(P, q, G, h, A, b)
+            alpha = np.asarray(sol['x']).ravel()
+            self.alphas[i] = alpha
+            self.bs[i] = _find_b(alpha, K, yi)
         self._is_fitted = True
 
     def predict(self, X):

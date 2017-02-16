@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.datasets import make_classification
 sys.path.append('modules')
 from svm import SVM, binarySVM
-from helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec
+from helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
 from mycv import hog
 
 def test_svm():
@@ -43,5 +43,19 @@ def submission():
     print '[INFO] Writing results to disk'
     save_label(y_test+1, 'data/Yte.csv')
 
+def cv():
+    print '[INFO] Loading data'
+    X = load_image('data/Xtr.csv')
+    y = load_label('data/Ytr.csv')
+    y -= 1
+    print '[INFO] Computing histogram of gradients'
+    X_ = img2vec(X, hog)
+    X_train, y_train, X_test, y_test = train_test_split(X_, y)
+    print '[INFO] Fitting SVM'
+    clf = SVM(C = 1, gamma = 1)
+    clf.fit(X_train, y_train)
+    print clf.score(X_test, y_test)
+
+
 if __name__ == '__main__':
-    submission()
+    cv()
