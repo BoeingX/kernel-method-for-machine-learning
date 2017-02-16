@@ -1,12 +1,12 @@
-import skimage
-import pandas as pd
-from pandas import DataFrame, Series
 import numpy as np
-sys.path.append('modules')
+import sys
+sys.path.append('../modules')
 from helper import load_image, load_label, train_test_split
 import cv2
 from sklearn.cluster import KMeans
 from sklearn.svm import SVC
+from mycv import hog
+
 def detect(X):
     ids = []
     descriptors = []
@@ -31,20 +31,32 @@ def BoW(X):
     lbs = clf.labels_
     return ids, lbs
 
+def HOG(X):
+    fds = np.empty((len(X), 128))
+    for i, img in enumerate(X):
+        fd = hog(img)
+        fds[i] = fd
+    return fds
+
+def grid_search(X, y):
+    from sklearn.model_selection import GridSearchCV
+    parameters = {'kernel': ['rbf'], 'C': [0.1, 1, 10, 50, 100], 'gamma': [1.0/128, 1.0/64, 1.0/16, 1.0/8, 1.0/4, 0.5, 1, 2]}
+    svc = SVC()
+    clf = GridSearchCV(svc, parameters, n_jobs=-1, cv = 5)
+    clf.fit(X, y)
+    return clf
+
 
 if __name__ == '__main__':
-    X = load_image('data/Xtr.csv')
-    y = load_label('data/Ytr.csv')
+    X = load_image('../data/Xtr.csv')
+    y = load_label('../data/Ytr.csv')
 
-    ids, lbs = BoW(X)
-    tmp = DataFrame()
-    tmp['lbs'] = lbs
-    tmp = pd.get_dummies(tmp['lbs'])
-    tmp['ids'] = ids
-    tmp = tmp.groupby('ids').sum()
-    X = tmp.as_matrix()
+    X_ = HOG(X)
+    #X_train, y_train, X_test, y_test = train_test_split(X_, y)
 
-    X_train, y_train, X_test, y_test = train_test_split(X, y)
-    clf = SVC()
-    clf.fit(X_train, y_train)
-    print clf.score(X_test, y_test)
+    #clf = SVC(C = 1.0, gamma = 1.0)
+    #clf.fit(X_train, y_train)
+    #print clf.score(X_test, y_test)
+    clf = grid_search(X_, y)
+    print clf.best_estimator_
+    print clf.best_score_

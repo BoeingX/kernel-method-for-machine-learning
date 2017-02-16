@@ -4,9 +4,9 @@ def binarize(y):
     if y.ndim != 1:
         print '[Warning] y is not a vector! Reshaping...'
         y = y.ravel()
+    y = np.asarray(y, dtype = int)
     n_samples = len(y)
     n_classes = len(np.unique(y))
-    print n_classes
     y_bin = -np.ones((n_samples, n_classes))
     #TODO: handle the case where original labels are arbitrary
     for i in xrange(n_samples):

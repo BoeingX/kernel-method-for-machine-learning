@@ -121,6 +121,7 @@ class SVM(Base):
                  'jac': lambda x: np.ones_like(x)}
                 )
         for i in xrange(n_classes):
+            print '[INFO] fitting class %d' % (i+1)
             yi = y_bin[:, i]
             func = lambda x: _f(x, K, yi)
             jac = lambda x: _f_grad(x, K, yi)
@@ -139,7 +140,7 @@ class SVM(Base):
     def predict(self, X):
         if not self._is_fitted:
             print '[Warning] Classifier is not yet fitted.'
-        K = cdist(self.X, b, self.f)
+        K = cdist(self.X, X, self.f)
         fs = np.dot(self.alphas, K)
         fs += np.multiply(self.bs.reshape(-1, 1), np.ones_like(fs))
         y = np.argmax(fs, axis = 0)
