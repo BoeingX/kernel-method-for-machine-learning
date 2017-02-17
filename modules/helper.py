@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+from functools import wraps
 def binarize(y):
     if y.ndim != 1:
         print '[Warning] y is not a vector! Reshaping...'
@@ -103,3 +105,11 @@ def img2vec(X, transformer, length = 128):
         fds[i] = fd
     return fds
 
+def timefn(fn):
+    @wraps(fn)
+    def measure_time(*args, **kwargs):
+        t1 = time.time()
+        result = fn(*args, **kwargs)
+        t2 = time.time()
+        print ("@timefn:" + fn.func_name + " took " + str(t2 - t1) + " seconds") return result
+    return measure_time
