@@ -4,7 +4,7 @@ from sklearn.datasets import make_classification
 from svm import SVM
 from sklearn.svm import SVC
 if __name__ == '__main__':
-    X, y = make_classification(n_samples=5000, n_informative=5, n_classes = 2, random_state = 20)
+    X, y = make_classification(n_samples=500, n_informative=5, n_classes = 10, random_state = 20)
 
     svm = SVM(kernel = 'rbf', tol = 1e-10)
     svm.fit(X, y)

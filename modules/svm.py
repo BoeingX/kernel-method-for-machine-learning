@@ -3,6 +3,7 @@ from scipy.optimize import fmin_l_bfgs_b, fmin_slsqp, minimize, fminbound
 from base import Base
 from helper import binarize, pdist, cdist
 from cvxopt import matrix, solvers
+from multiprocessing.dummy import Pool
 
 def prepare_input_for_cvxopt(K, y, C, n):
     P = 2*matrix(K, tc = 'd')
@@ -106,6 +107,14 @@ class SVM(Base):
         b, _, _ = fmin_l_bfgs_b(f, b, approx_grad=True)
         return b
 
+    def _fit_single(self, K, y_bin, i):
+        y = y_bin[:, i]
+        P, q, G, h, A, b  = prepare_input_for_cvxopt(K, y, self.C, len(y))
+        sol = solvers.qp(P, q, G, h, A, b)
+        alpha = np.asarray(sol['x']).ravel()
+        b = _find_b(alpha, K, y)
+        return np.concatenate((alpha, np.asarray(b)))
+
     def fit(self, X, y):
         self.X = X
         n_classes = len(np.unique(y))
@@ -120,38 +129,20 @@ class SVM(Base):
             pass
         K = pdist(X, self.f)
         y_bin = binarize(y)
-        self.alphas = np.empty((n_classes, n_samples))
-        self.bs = np.empty(n_classes)
-        #bounds = [(None, None)] * n_samples
-        #for j in xrange(n_samples):
-        #    if y[j] == 1:
-        #        bounds[j] = (0, self.C)
-        #    else:
-        #        bounds[j] = (-self.C, 0)
-        #cons = ({'type': 'eq',
-        #         'fun': lambda x: np.sum(x),
-        #         'jac': lambda x: np.ones_like(x)}
-        #        )
-        for i in xrange(n_classes):
-            print '[INFO] fitting class %d' % (i+1)
-            yi = y_bin[:, i]
-            #func = lambda x: _f(x, K, yi)
-            #jac = lambda x: _f_grad(x, K, yi)
-            #bounds = [(None, None)] * n_samples
-            #for j in xrange(n_samples):
-            #    if yi[j] == 1:
-            #        bounds[j] = (0, self.C)
-            #    else:
-            #        bounds[j] = (-self.C, 0)
-            #alpha = np.zeros(n_samples)
-            #alpha = minimize(func, alpha, method = 'SLSQP', jac = jac, bounds = bounds, constraints=cons, options={'disp': True})
-            #self.alphas[i] = alpha['x']
-            #self.bs[i] = _find_b(alpha['x'], K, yi)
-            P, q, G, h, A, b  = prepare_input_for_cvxopt(K, yi, self.C, len(yi))
-            sol = solvers.qp(P, q, G, h, A, b)
-            alpha = np.asarray(sol['x']).ravel()
-            self.alphas[i] = alpha
-            self.bs[i] = _find_b(alpha, K, yi)
+        pool = Pool(4)
+        alphas_bs = np.asarray(pool.map(lambda x: self._fit_single(K, y_bin, x), range(n_classes)))
+        self.alphas = alphas_bs[:, :-1]
+        self.bs = alphas_bs[:, -1]
+        #self.alphas = np.empty((n_classes, n_samples))
+        #self.bs = np.empty(n_classes)
+        #for i in xrange(n_classes):
+        #    print '[INFO] fitting class %d' % (i+1)
+        #    yi = y_bin[:, i]
+        #    P, q, G, h, A, b  = prepare_input_for_cvxopt(K, yi, self.C, len(yi))
+        #    sol = solvers.qp(P, q, G, h, A, b)
+        #    alpha = np.asarray(sol['x']).ravel()
+        #    self.alphas[i] = alpha
+        #    self.bs[i] = _find_b(alpha, K, yi)
         self._is_fitted = True
 
     def predict(self, X):

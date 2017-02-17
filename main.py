@@ -7,6 +7,7 @@ sys.path.append('modules')
 from svm import SVM, binarySVM
 from helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
 from mycv import hog
+from sklearn.svm import SVC
 
 def test_svm():
     X, y = make_classification(n_samples=100, n_informative=5, n_classes = 2, random_state = 20)
@@ -50,12 +51,18 @@ def cv():
     y -= 1
     print '[INFO] Computing histogram of gradients'
     X_ = img2vec(X, hog)
-    X_train, y_train, X_test, y_test = train_test_split(X_, y)
-    print '[INFO] Fitting SVM'
-    clf = SVM(C = 1, gamma = 1)
-    clf.fit(X_train, y_train)
-    print clf.score(X_test, y_test)
-
+    #X_train, y_train, X_test, y_test = train_test_split(X_, y)
+    #print '[INFO] Fitting SVM'
+    #clf = SVM(C = 10)
+    #clf.fit(X_train, y_train)
+    #print clf.score(X_test, y_test)
+    from sklearn.model_selection import GridSearchCV
+    parameters = {'kernel': ['rbf'], 'C': [0.1, 1, 10, 50, 100], 'gamma': [1.0/128, 1.0/64, 1.0/16, 1.0/8, 1.0/4, 0.5, 1, 2]}
+    svc = SVM()
+    clf = GridSearchCV(svc, parameters, n_jobs=1, cv = 5)
+    clf.fit(X_, y)
+    print clf.best_estimator_
+    print clf.best_score_
 
 if __name__ == '__main__':
     cv()
