@@ -1,9 +1,11 @@
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b, fmin_slsqp, minimize, fminbound
-from base import Base
-from helper import binarize, pdist, cdist
 from cvxopt import matrix, solvers
 from multiprocessing.dummy import Pool
+
+from base import Base
+from helper import binarize, pdist, cdist
+from kernel import rbf, linear, polynomial
 
 def prepare_input_for_cvxopt(K, y, C, n):
     P = 2*matrix(K, tc = 'd')
@@ -108,6 +110,7 @@ class SVM(Base):
         return b
 
     def _fit_single(self, K, y_bin, i):
+        print '[INFO] fitting class %d' % i
         y = y_bin[:, i]
         P, q, G, h, A, b  = prepare_input_for_cvxopt(K, y, self.C, len(y))
         sol = solvers.qp(P, q, G, h, A, b)
@@ -122,9 +125,9 @@ class SVM(Base):
         if self.gamma == 'auto':
             self.gamma = 1.0 / n_features
         if self.kernel == 'rbf':
-            self.f = lambda x, y: np.exp(-np.sum(np.square(x-y))*self.gamma)
+            self.f = lambda x, y: rbf(x, y, self.gamma)
         elif self.kernel == 'linear':
-            self.f = lambda x, y: np.dot(x, y)
+            self.f = linear
         else:
             pass
         K = pdist(X, self.f)

@@ -30,13 +30,9 @@ def cdist(X, Y, f):
     n2 = len(Y)
     K = np.empty((n1, n2))
     for i in xrange(n1):
-        for j in xrange(i, n2):
+        for j in xrange(n2):
             d = f(X[i], Y[j])
-            try:
-                K[i, j] = d
-                K[j, i] = d
-            except:
-                pass
+            K[i, j] = d
     return K
 
 def rgb2grayscale(R, G, B):

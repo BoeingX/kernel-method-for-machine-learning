@@ -44,25 +44,22 @@ def submission():
     print '[INFO] Writing results to disk'
     save_label(y_test+1, 'data/Yte.csv')
 
-def cv():
+def test():
     print '[INFO] Loading data'
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
     y -= 1
     print '[INFO] Computing histogram of gradients'
     X_ = img2vec(X, hog)
-    #X_train, y_train, X_test, y_test = train_test_split(X_, y)
-    #print '[INFO] Fitting SVM'
-    #clf = SVM(C = 10)
-    #clf.fit(X_train, y_train)
-    #print clf.score(X_test, y_test)
-    from sklearn.model_selection import GridSearchCV
-    parameters = {'kernel': ['rbf'], 'C': [0.1, 1, 10, 50, 100], 'gamma': [1.0/128, 1.0/64, 1.0/16, 1.0/8, 1.0/4, 0.5, 1, 2]}
-    svc = SVM()
-    clf = GridSearchCV(svc, parameters, n_jobs=1, cv = 5)
-    clf.fit(X_, y)
-    print clf.best_estimator_
-    print clf.best_score_
+    X_train, y_train, X_test, y_test = train_test_split(X_, y)
+
+    print '[INFO] Fitting SVM'
+    clf = SVM(C = 10)
+    clf.fit(X_train, y_train)
+    print '[INFO] Predicting'
+    print clf.score(X_train, y_train)
+
 
 if __name__ == '__main__':
-    cv()
+    #test()
+    submission()
