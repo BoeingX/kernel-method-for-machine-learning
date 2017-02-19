@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from sklearn.datasets import make_classification
 sys.path.append('modules')
-from svm import SVM, binarySVM
+from svm import SVM
 from helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
 from mycv import hog
 from sklearn.svm import SVC
@@ -52,17 +52,35 @@ def test(cv = 3):
     print '[INFO] Computing histogram of gradients'
     X_ = img2vec(X, hog)
 
+    scores_train = [None]*cv
     scores = [None]*cv
     for i in xrange(cv):
         X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
         print '[INFO] Fitting SVM'
-        clf = SVM(C = 10)
+        from sklearn.svm import SVC
+        clf = SVC(C = 10, gamma = 1.0/256)
         clf.fit(X_train, y_train)
         print '[INFO] Predicting'
-        scores[i] = clf.score(X_train, y_train)
+        scores_train[i] = clf.score(X_train, y_train)
+        scores[i] = clf.score(X_test, y_test)
     print scores
 
+def grid_search():
+    X = load_image('data/Xtr.csv')
+    y = load_label('data/Ytr.csv')
+    y -= 1
+    print '[INFO] Computing histogram of gradients'
+    X_ = img2vec(X, hog)
+    from sklearn.model_selection import GridSearchCV
+    from sklearn.svm import SVC
+    parameters = {'kernel': ['rbf'], 'C': [0.01, 0.1, 1, 10, 20], 'gamma': np.linspace(1.0/512, 1.0/128, 50)}
+    svc = SVC()
+    clf = GridSearchCV(svc, parameters, n_jobs=-1)
+    clf.fit(X_, y)
+    print clf.best_estimator_
+    print clf.best_score_
 
 if __name__ == '__main__':
     test()
     #submission()
+    #grid_search()

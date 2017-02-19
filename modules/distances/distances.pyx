@@ -10,10 +10,7 @@ cimport numpy as np
 from cython.parallel cimport prange
 from libc.math cimport exp
 
-DTYPE = np.float
-ctypedef np.float_t DTYPE_t
-
-cdef inline double linear(double[:] x, double[:] y, float gamma, int n) nogil:
+cdef inline double linear(double[:] x, double[:] y, int n) nogil:
     cdef double dot = 0.0
     for i in xrange(n):
         dot += x[i] * y[i]
@@ -25,7 +22,8 @@ cdef inline double rbf(double[:] x, double[:] y, float gamma, int n) nogil:
         norm2 += (x[i] - y[i])**2
     return exp(-norm2)
 
-cpdef double[:,:] pdist(double[:,:] X, float gamma):
+
+cpdef double[:,:] pdist(double[:,:] X, char* f = 'rbf', float gamma = 1.0, int degree = 3, float coef0 = 1.0):
     cdef int n_samples = len(X)
     cdef double[:,:] K = np.empty((n_samples, n_samples))
     cdef int i, j, n

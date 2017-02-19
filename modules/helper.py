@@ -15,25 +15,34 @@ def binarize(y):
         y_bin[i][y[i]] = 1
     return y_bin
 
-def pdist(X, f):
-    n_samples = len(X)
-    K = np.empty((n_samples, n_samples))
-    for i in xrange(n_samples):
-        for j in xrange(i, n_samples):
-            d = f(X[i], X[j])
-            K[i, j] = d
-            K[j, i] = d
-    return K
+def pdist(X, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
+    n = len(X)
+    if kernel == 'rbf':
+        A = np.multiply(np.square(np.linalg.norm(X, axis = 1)).reshape(-1, 1), np.ones((n, n)))
+        B = np.dot(X, X.T)
+        C = A.T
+        return np.exp(gamma*(-A + 2*B - C))
+    elif kernel == 'linear':
+        return np.dot(X, X.T)
+    elif kernel == 'polynomial':
+        pass
+    else:
+        pass
 
-def cdist(X, Y, f):
+def cdist(X, Y, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
     n1 = len(X)
     n2 = len(Y)
-    K = np.empty((n1, n2))
-    for i in xrange(n1):
-        for j in xrange(n2):
-            d = f(X[i], Y[j])
-            K[i, j] = d
-    return K
+    if kernel == 'rbf':
+        A = np.multiply(np.square(np.linalg.norm(X, axis = 1)).reshape(-1, 1), np.ones((n1, n2)))
+        B = np.dot(X, Y.T)
+        C = np.multiply(np.square(np.linalg.norm(Y, axis = 1)).reshape(1, -1), np.ones((n1, n2)))
+        return np.exp(gamma*(-A + 2*B - C))
+    elif kernel == 'linear':
+        return np.dot(X, Y.T)
+    elif kernel == 'polynomial':
+        pass
+    else:
+        pass
 
 def rgb2grayscale(R, G, B):
     return 0.2126*R + 0.7152*G + 0.0722*B
