@@ -44,22 +44,25 @@ def submission():
     print '[INFO] Writing results to disk'
     save_label(y_test+1, 'data/Yte.csv')
 
-def test():
+def test(cv = 3):
     print '[INFO] Loading data'
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
     y -= 1
     print '[INFO] Computing histogram of gradients'
     X_ = img2vec(X, hog)
-    X_train, y_train, X_test, y_test = train_test_split(X_, y)
 
-    print '[INFO] Fitting SVM'
-    clf = SVM(C = 10)
-    clf.fit(X_train, y_train)
-    print '[INFO] Predicting'
-    print clf.score(X_train, y_train)
+    scores = [None]*cv
+    for i in xrange(cv):
+        X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
+        print '[INFO] Fitting SVM'
+        clf = SVM(C = 10)
+        clf.fit(X_train, y_train)
+        print '[INFO] Predicting'
+        scores[i] = clf.score(X_train, y_train)
+    print scores
 
 
 if __name__ == '__main__':
-    #test()
-    submission()
+    test()
+    #submission()
