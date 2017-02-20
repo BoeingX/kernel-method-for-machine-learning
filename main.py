@@ -55,7 +55,7 @@ def test(cv = 3):
 
     scores_train = [None]*cv
     scores = [None]*cv
-    for i in xrange
+    for i in xrange(cv):
         X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
         print '[INFO] Fitting SVM'
         from sklearn.svm import SVC
@@ -75,15 +75,14 @@ def grid_search():
     #X_ = img2vec(X, lambda x: hog(x, orientations=8, pixels_per_cell=(8,8), cells_per_block=(1,1)), y)
     X_, y = img2vec(X, hog, y)
     from sklearn.model_selection import GridSearchCV
-    from sklearn.svm import SVC
     parameters = {'kernel': ['rbf'], 'C': np.linspace(0.1, 10, 20)}
-    svc = SVC()
+    svc = SVM()
     clf = GridSearchCV(svc, parameters, n_jobs=-1)
     clf.fit(X_, y)
     print clf.best_estimator_
     print clf.best_score_
 
 if __name__ == '__main__':
-    test()
+    #test()
     #submission()
-    #grid_search()
+    grid_search()
