@@ -1,11 +1,11 @@
 import numpy as np
 import sys
-sys.path.append('modules')
+sys.path.append('../modules')
 from helper import load_image, load_label, train_test_split
 import cv2
 from sklearn.cluster import KMeans
 from sklearn.svm import SVC
-from mycv import hog
+from skimage.feature import hog
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -36,31 +36,28 @@ def BoW(X):
 def HOG(X):
     fds = np.empty((len(X), 128))
     for i, img in enumerate(X):
-        fd = hog(img)
+        img = img.reshape(32, 32)
+        fd = hog(img, pixels_per_cell=(8,8), cells_per_block=(1,1), orientations=8)
         fds[i] = fd
     return fds
 
 def grid_search(X, y):
     from sklearn.model_selection import GridSearchCV
     #parameters = {'kernel': ['rbf'], 'C': [0.1, 1, 10, 50, 100], 'gamma': [1.0/128, 1.0/64, 1.0/16, 1.0/8, 1.0/4, 0.5, 1, 2]}
-    #svc = SVC()
-    #clf = GridSearchCV(svc, parameters, n_jobs=-1, cv = 5)
-    parameters = {'kernel': ['rbf'], 'alpha': [0.1, 1, 10, 50, 100], 'gamma': [1.0/128, 1.0/64, 1.0/16, 1.0/8]}
-    kr = KernelRidge()
-    clf = GridSearchCV(kr, parameters, n_jobs=-1, cv = 5)
+    parameters = {'kernel': ['rbf'], 'C': np.linspace(0.1, 10, 100)}
+    svc = SVC()
+    clf = GridSearchCV(svc, parameters, n_jobs=-1, cv = 3)
     clf.fit(X, y)
     return clf
 
 if __name__ == '__main__':
-    X = load_image('data/Xtr.csv')
-    y = load_label('data/Ytr.csv')
+    X = load_image('../data/Xtr.csv')
+    y = load_label('../data/Ytr.csv')
 
     X_ = HOG(X)
+
     X_train, y_train, X_test, y_test = train_test_split(X_, y)
 
-    clf = KernelRidge(kernel = 'rbf')
-    clf.fit(X_train, y_train)
-    print clf.score(X_test, y_test)
-    #clf = grid_search(X_, y)
-    #print clf.best_estimator_
-    #print clf.best_score_
+    clf = grid_search(X_, y)
+    print clf.best_estimator_
+    print clf.best_score_

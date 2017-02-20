@@ -1,7 +1,7 @@
 import numpy as np
-from helper import load_image
 import warnings
 warnings.filterwarnings("error")
+
 def gradient(X):
     X = np.asarray(X, dtype = float)
     grad_X = np.zeros_like(X)
@@ -59,19 +59,22 @@ def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1',
 def bootstrap(X, y):
     sx, sy = X.shape
     ndim = int(np.sqrt(sy))
-    X_ = np.zeros((sx*5, sy))
-    for i in sx:
-        X_[5*i] = X[i]
+    # translation
+    #X_ = np.zeros((sx*5, sy))
+    #for i in sx:
+    #    X_[5*i] = X[i]
+    #    img = X[i].reshape(ndim, ndim)
+    #    X_[5*i + 1] = np.pad(img[:, 1:], ((0, 0), (0, 1)), 'constant', constant_values=0).ravel()
+    #    X_[5*i + 2] = np.pad(img[:, :-1], ((0, 0), (1, 0)), 'constant', constant_values=0).ravel()
+    #    X_[5*i + 3] = np.pad(img[1:, :], ((0, 1), (0, 0)), 'constant', constant_values=0).ravel()
+    #    X_[5*i + 4] = np.pad(img[:-1, :], ((1, 0), (0, 0)), 'constant', constant_values=0).ravel()
+    #return X_, np.repeat(y, 5)
+    # reflection
+    X_ = np.zeros((sx*4, sy))
+    for i in range(sx):
+        X_[4*i] = X[i]
         img = X[i].reshape(ndim, ndim)
-        X_[5*i + 1] = np.pad(img[:, 1:], ((0, 0), (0, 1)), 'constant', constant_values=0).ravel()
-        X_[5*i + 2] = np.pad(img[:, :-1], ((0, 0), (1, 0)), 'constant', constant_values=0).ravel()
-        X_[5*i + 3] = np.pad(img[1:, :], ((0, 1), (0, 0)), 'constant', constant_values=0).ravel()
-        X_[5*i + 4] = np.pad(img[:-1, :], ((1, 0), (0, 0)), 'constant', constant_values=0).ravel()
-    return X_, np.repeat(y, 5)
-
-
-if __name__ == '__main__':
-    X = load_image('../data/Xtr.csv', max_rows = 2)
-    X = X[0]
-    hist = hog(X)
-    print hist
+        X_[4*i + 1] = np.fliplr(img).ravel()
+        X_[4*i + 2] = np.flipud(img).ravel()
+        X_[4*i + 3] = np.fliplr(np.flipud(img)).ravel()
+    return X_, np.repeat(y, 4)

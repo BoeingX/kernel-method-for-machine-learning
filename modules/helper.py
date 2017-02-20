@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from functools import wraps
+from mycv import bootstrap
+
 def binarize(y):
     if y.ndim != 1:
         print '[Warning] y is not a vector! Reshaping...'
@@ -103,15 +105,22 @@ def train_test_split(X, y, test_ratio = 0.1):
     idx_test = list(idx_test)
     return X[idx_train, :], y[idx_train], X[idx_test, :], y[idx_test]
 
-def img2vec(X, transformer, length = 128):
-    fds = np.empty((len(X), length))
+def img2vec(X, transformer, y = None, bt = False, length = 168 + 8*64):
+    if bt and (y is not None):
+        X, y = bootstrap(X, y)
+    X_vec = np.empty((len(X), length))
     ndim = int(np.sqrt(len(X[0])))
     for i, img in enumerate(X):
         if img.ndim == 1:
             img = img.reshape(ndim, ndim)
-        fd = transformer(img)
-        fds[i] = fd
-    return fds
+        x_vec = np.empty(0)
+        for pixels_per_cell in [(4, 4), (8, 8), (16, 16), (32, 32)]:
+            x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
+        X_vec[i] = x_vec
+    if y is not None:
+        return X_vec, y
+    else:
+        return X_vec
 
 def timefn(fn):
     @wraps(fn)
