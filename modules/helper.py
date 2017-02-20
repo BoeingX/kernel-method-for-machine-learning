@@ -105,7 +105,10 @@ def train_test_split(X, y, test_ratio = 0.1):
 
 def img2vec(X, transformer, length = 128):
     fds = np.empty((len(X), length))
+    ndim = int(np.sqrt(len(X[0])))
     for i, img in enumerate(X):
+        if img.ndim == 1:
+            img = img.reshape(ndim, ndim)
         fd = transformer(img)
         fds[i] = fd
     return fds
