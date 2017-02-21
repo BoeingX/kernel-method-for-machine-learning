@@ -1,5 +1,8 @@
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
+import cvxopt
+# Do not show optimization progress during optimization
+cvxopt.solvers.options['show_progress'] = False
 from cvxopt import matrix, solvers
 from multiprocessing.dummy import Pool
 

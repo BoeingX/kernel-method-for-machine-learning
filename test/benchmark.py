@@ -8,6 +8,7 @@ from sklearn.svm import SVC
 from skimage.feature import hog
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import DictionaryLearning
 
 def detect(X):
     ids = []
@@ -51,13 +52,21 @@ def grid_search(X, y):
     return clf
 
 if __name__ == '__main__':
+    print '[INFO] loading data'
     X = load_image('../data/Xtr.csv')
     y = load_label('../data/Ytr.csv')
 
-    X_ = HOG(X)
+    X_train, y_train, X_test, y_test = train_test_split(X, y)
+    dct = DictionaryLearning(transform_algorithm='lasso_cd')
+    print '[INFO] fitting dictionary'
+    dct.fit(X_train)
+    print '[INFO] transforming training data'
+    X_train_ = dct.transform(X_train)
+    print '[INFO] transforming test data'
+    X_test_ = dct.transform(X_test)
 
-    X_train, y_train, X_test, y_test = train_test_split(X_, y)
-
-    clf = grid_search(X_, y)
-    print clf.best_estimator_
-    print clf.best_score_
+    clf = SVC()
+    print '[INFO] fitting SVM'
+    clf.fit(X_train_, y_train)
+    print clf.score(X_train_, y_train)
+    print clf.score(X_test_, y_test)

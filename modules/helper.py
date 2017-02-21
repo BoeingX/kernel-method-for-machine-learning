@@ -105,7 +105,7 @@ def train_test_split(X, y, test_ratio = 0.1):
     idx_test = list(idx_test)
     return X[idx_train, :], y[idx_train], X[idx_test, :], y[idx_test]
 
-def img2vec(X, transformer, y = None, bt = False, length = 168 + 8*64):
+def img2vec(X, transformer, y = None, bt = False, length = 168):
     if bt and (y is not None):
         X, y = bootstrap(X, y)
     X_vec = np.empty((len(X), length))
@@ -114,7 +114,7 @@ def img2vec(X, transformer, y = None, bt = False, length = 168 + 8*64):
         if img.ndim == 1:
             img = img.reshape(ndim, ndim)
         x_vec = np.empty(0)
-        for pixels_per_cell in [(4, 4), (8, 8), (16, 16), (32, 32)]:
+        for pixels_per_cell in [(8, 8), (16, 16), (32, 32)]:
             x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
         X_vec[i] = x_vec
     if y is not None:

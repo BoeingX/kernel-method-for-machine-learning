@@ -56,16 +56,17 @@ def test(cv = 3):
     scores_train = [None]*cv
     scores = [None]*cv
     for i in xrange(cv):
+        print '[INFO] Fold No. %d' % (i+1)
         X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
         print '[INFO] Fitting SVM'
-        from sklearn.svm import SVC
-        clf = SVC(C = 10)
+        clf = SVM(C = 9.5)
         clf.fit(X_train, y_train)
         print '[INFO] Predicting'
         scores_train[i] = clf.score(X_train, y_train)
         scores[i] = clf.score(X_test, y_test)
     print scores_train
     print scores
+    print np.mean(scores)
 
 def grid_search():
     X = load_image('data/Xtr.csv')
@@ -83,6 +84,6 @@ def grid_search():
     print clf.best_score_
 
 if __name__ == '__main__':
-    #test()
+    test(10)
     #submission()
-    grid_search()
+    #grid_search()

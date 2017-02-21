@@ -23,7 +23,7 @@ def normalize(X):
     X = (X - min_val) / (max_val - min_val)
     return 255*X
 
-def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1', transform_sqrt = True):
+def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1', transform_sqrt = False):
     # if X if a 1D vector
     if X.ndim == 1:
         n_dim = int(np.sqrt(len(X)))
