@@ -4,9 +4,9 @@ import sys
 import numpy as np
 from sklearn.datasets import make_classification
 sys.path.append('modules')
-from svm import SVM
-from helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
-from mycv import hog
+from modules.svm import SVM
+from modules.helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
+from modules.mycv import hog
 from sklearn.svm import SVC
 #from skimage.feature import hog
 
