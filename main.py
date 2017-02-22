@@ -15,13 +15,13 @@ def test_svm():
 
     svm = SVM(kernel = 'linear', tol = 1e-10)
     svm.fit(X, y)
-    print svm.score(X, y)
-    print svm.bs
+    print(svm.score(X, y))
+    print(svm.bs)
 
     svc = SVC(kernel='linear', decision_function_shape = 'ovr')
     svc.fit(X, y)
-    print svc.score(X, y)
-    print svc.intercept_
+    print(svc.score(X, y))
+    print(svc.intercept_)
 
 def test_io():
     X_train = load_image('data/Xtr.csv')
@@ -30,49 +30,49 @@ def test_io():
     save_label(y_train, 'data/Yte.csv')
 
 def submission():
-    print '[INFO] Loading data'
+    print('[INFO] Loading data')
     X_train = load_image('data/Xtr.csv')
     X_test = load_image('data/Xte.csv')
     y_train = load_label('data/Ytr.csv')
-    print '[INFO] Computing histogram of gradients'
+    print('[INFO] Computing histogram of gradients')
     X_train_, y_train = img2vec(X_train, hog, y_train)
     X_test_ = img2vec(X_test, hog)
-    print '[INFO] Fitting SVM'
+    print('[INFO] Fitting SVM')
     clf = SVM(C = 10)
     clf.fit(X_train_, y_train-1)
-    print '[INFO] Predicting'
+    print('[INFO] Predicting')
     y_test = clf.predict(X_test_)
-    print '[INFO] Writing results to disk'
+    print('[INFO] Writing results to disk')
     save_label(y_test+1, 'data/Yte.csv')
 
 def test(cv = 3):
-    print '[INFO] Loading data'
+    print('[INFO] Loading data')
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
     y -= 1
-    print '[INFO] Computing histogram of gradients'
+    print('[INFO] Computing histogram of gradients')
     X_, y = img2vec(X, hog, y, bt = False)
 
     scores_train = [None]*cv
     scores = [None]*cv
-    for i in xrange(cv):
-        print '[INFO] Fold No. %d' % (i+1)
+    for i in range(cv):
+        print('[INFO] Fold No. %d' % (i+1))
         X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
-        print '[INFO] Fitting SVM'
+        print('[INFO] Fitting SVM')
         clf = SVM(C = 9.5)
         clf.fit(X_train, y_train)
-        print '[INFO] Predicting'
+        print('[INFO] Predicting')
         scores_train[i] = clf.score(X_train, y_train)
         scores[i] = clf.score(X_test, y_test)
-    print scores_train
-    print scores
-    print np.mean(scores)
+    print(scores_train)
+    print(scores)
+    print(np.mean(scores))
 
 def grid_search():
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
     y -= 1
-    print '[INFO] Computing histogram of gradients'
+    print('[INFO] Computing histogram of gradients')
     #X_ = img2vec(X, lambda x: hog(x, orientations=8, pixels_per_cell=(8,8), cells_per_block=(1,1)), y)
     X_, y = img2vec(X, hog, y)
     from sklearn.model_selection import GridSearchCV
@@ -80,8 +80,8 @@ def grid_search():
     svc = SVM()
     clf = GridSearchCV(svc, parameters, n_jobs=-1)
     clf.fit(X_, y)
-    print clf.best_estimator_
-    print clf.best_score_
+    print(clf.best_estimator_)
+    print(clf.best_score_)
 
 if __name__ == '__main__':
     test(10)

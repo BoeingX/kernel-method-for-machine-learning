@@ -56,7 +56,7 @@ class SVM(Base):
         return b
 
     def _fit_single(self, K, y_bin, i):
-        print '[INFO] fitting class %d' % i
+        print('[INFO] fitting class %d' % i)
         y = y_bin[:, i]
         P, q, G, h, A, b  = _prepare_input_for_cvxopt(K, y, self.C, len(y))
         sol = solvers.qp(P, q, G, h, A, b)
@@ -86,7 +86,7 @@ class SVM(Base):
 
     def predict(self, X):
         if not self._is_fitted:
-            print '[Warning] Classifier is not yet fitted.'
+            print('[Warning] Classifier is not yet fitted.')
         K = cdist(self.X, X, self.kernel, self.gamma)
         fs = np.dot(self.alphas, K)
         fs += np.multiply(self.bs.reshape(-1, 1), np.ones_like(fs))

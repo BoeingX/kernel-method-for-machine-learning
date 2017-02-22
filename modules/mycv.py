@@ -46,8 +46,8 @@ def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1',
     ncy = int(np.floor(sy // cy))
 
     hist = np.empty(0)
-    for i in xrange(ncx):
-        for j in xrange(ncy):
+    for i in range(ncx):
+        for j in range(ncy):
             ang_sub = ang[i*cx:(i+1)*cx, j*cy:(j+1)*cy].ravel()
             mag_sub = mag[i*cx:(i+1)*cx, j*cy:(j+1)*cy].ravel()
             hst_sub, _ = np.histogram(ang_sub, weights = mag_sub, bins = 8, range = (0, 360))
@@ -55,6 +55,7 @@ def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1',
             hst_sub /= np.sum(hst_sub)
             hist = np.concatenate((hist, hst_sub))
     return hist
+
 
 def bootstrap(X, y):
     sx, sy = X.shape
