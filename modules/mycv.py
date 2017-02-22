@@ -8,12 +8,17 @@ def gradient(X):
     grad_Y = np.zeros_like(X)
     grad_X[:, :-1] = X[:, 1:] - X[:, :-1]
     grad_Y[:-1, :] = X[1:, :] - X[:-1, :]
-    return grad_X + 1e-15, grad_Y + 1e-15
+    #grad_X[:, :-2] = X[:, 2:] - X[:, :-2]
+    #grad_Y[:-2, :] = X[2:, :] - X[:-2, :]
+    return grad_X, grad_Y
     #return np.pad(grad_X, ((0, 0), (2, 0)), 'constant', constant_values=0), np.pad(grad_Y, ((2, 0), (0, 0)), 'constant', constant_values=0)
 
 def card2polar(X, Y):
     mag = np.sqrt(X**2 + Y**2)
-    ang = (np.arctan2(Y, X) / np.pi + 1) * 180
+    #ang = (np.arctan2(Y, X + 1e-15) / np.pi + 1) * 180
+    #ang = np.abs((np.arctan2(Y, X + 1e-15) / np.pi) * 180)
+    ang = np.arctan2(Y, (X + 1e-15)) * (180 / np.pi) + 90
+
     return mag, ang
 
 def normalize(X):
@@ -50,31 +55,46 @@ def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1',
         for j in xrange(ncy):
             ang_sub = ang[i*cx:(i+1)*cx, j*cy:(j+1)*cy].ravel()
             mag_sub = mag[i*cx:(i+1)*cx, j*cy:(j+1)*cy].ravel()
-            hst_sub, _ = np.histogram(ang_sub, weights = mag_sub, bins = 8, range = (0, 360))
+            hst_sub, _ = np.histogram(ang_sub, weights = mag_sub, bins = 9, range = (0, 180))
             # block normalization
-            hst_sub /= np.sum(hst_sub)
+            hst_sub /= (np.sum(hst_sub) + 1e-5)
             hist = np.concatenate((hist, hst_sub))
     return hist
+    #orientations = 8
+    #orientation_histogram = np.zeros((ncx, ncy, orientations))
+    #for i in range(orientations):
+    #    #create new integral image for this orientation
+    #    # isolate orientations in this range
+
+    #    temp_ori = np.where(ang < 180 / orientations * (i + 1),
+    #                        ang, 0)
+    #    temp_ori = np.where(ang >= 180 / orientations * i,
+    #                        temp_ori, 0)
+    #    # select magnitudes for those orientations
+    #    cond2 = temp_ori > 0
+    #    temp_mag = np.where(cond2, magnitude, 0)
+
+    #    orientation_histogram[:,:,i] = uniform_filter(temp_mag, size=(cx, cy))[cx/2::cx, cy/2::cy].T
 
 def bootstrap(X, y):
     sx, sy = X.shape
     ndim = int(np.sqrt(sy))
     # translation
-    #X_ = np.zeros((sx*5, sy))
-    #for i in sx:
-    #    X_[5*i] = X[i]
-    #    img = X[i].reshape(ndim, ndim)
-    #    X_[5*i + 1] = np.pad(img[:, 1:], ((0, 0), (0, 1)), 'constant', constant_values=0).ravel()
-    #    X_[5*i + 2] = np.pad(img[:, :-1], ((0, 0), (1, 0)), 'constant', constant_values=0).ravel()
-    #    X_[5*i + 3] = np.pad(img[1:, :], ((0, 1), (0, 0)), 'constant', constant_values=0).ravel()
-    #    X_[5*i + 4] = np.pad(img[:-1, :], ((1, 0), (0, 0)), 'constant', constant_values=0).ravel()
-    #return X_, np.repeat(y, 5)
-    # reflection
-    X_ = np.zeros((sx*4, sy))
+    X_ = np.zeros((sx*5, sy))
     for i in range(sx):
-        X_[4*i] = X[i]
+        X_[5*i] = X[i]
         img = X[i].reshape(ndim, ndim)
-        X_[4*i + 1] = np.fliplr(img).ravel()
-        X_[4*i + 2] = np.flipud(img).ravel()
-        X_[4*i + 3] = np.fliplr(np.flipud(img)).ravel()
-    return X_, np.repeat(y, 4)
+        X_[5*i + 1] = np.pad(img[:, 1:], ((0, 0), (0, 1)), 'constant', constant_values=0).ravel()
+        X_[5*i + 2] = np.pad(img[:, :-1], ((0, 0), (1, 0)), 'constant', constant_values=0).ravel()
+        X_[5*i + 3] = np.pad(img[1:, :], ((0, 1), (0, 0)), 'constant', constant_values=0).ravel()
+        X_[5*i + 4] = np.pad(img[:-1, :], ((1, 0), (0, 0)), 'constant', constant_values=0).ravel()
+    return X_, np.repeat(y, 5)
+    ## reflection
+    #X_ = np.zeros((sx*4, sy))
+    #for i in range(sx):
+    #    X_[4*i] = X[i]
+    #    img = X[i].reshape(ndim, ndim)
+    #    X_[4*i + 1] = np.fliplr(img).ravel()
+    #    X_[4*i + 2] = np.flipud(img).ravel()
+    #    X_[4*i + 3] = np.fliplr(np.flipud(img)).ravel()
+    #return X_, np.repeat(y, 4)

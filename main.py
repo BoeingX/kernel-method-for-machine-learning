@@ -35,8 +35,8 @@ def submission():
     X_test = load_image('data/Xte.csv')
     y_train = load_label('data/Ytr.csv')
     print '[INFO] Computing histogram of gradients'
-    X_train_, y_train = img2vec(X_train, hog, y_train)
-    X_test_ = img2vec(X_test, hog)
+    X_train_, y_train = img2vec(X_train, hog, y_train, bt = True, length = 144)
+    X_test_ = img2vec(X_test, hog, length = 144)
     print '[INFO] Fitting SVM'
     clf = SVM(C = 10)
     clf.fit(X_train_, y_train-1)
@@ -51,15 +51,16 @@ def test(cv = 3):
     y = load_label('data/Ytr.csv')
     y -= 1
     print '[INFO] Computing histogram of gradients'
-    X_, y = img2vec(X, hog, y, bt = False)
+    X_, y = img2vec(X, hog, y, bt = True, length = 144)
 
     scores_train = [None]*cv
     scores = [None]*cv
-    for i in xrange(cv):
+    #for i in xrange(cv):
+    for i in xrange(1):
         print '[INFO] Fold No. %d' % (i+1)
         X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
         print '[INFO] Fitting SVM'
-        clf = SVM(C = 9.5)
+        clf = SVC(C = 10)
         clf.fit(X_train, y_train)
         print '[INFO] Predicting'
         scores_train[i] = clf.score(X_train, y_train)
@@ -74,16 +75,16 @@ def grid_search():
     y -= 1
     print '[INFO] Computing histogram of gradients'
     #X_ = img2vec(X, lambda x: hog(x, orientations=8, pixels_per_cell=(8,8), cells_per_block=(1,1)), y)
-    X_, y = img2vec(X, hog, y)
+    X_, y = img2vec(X, hog, y, bt = True, length = 144)
     from sklearn.model_selection import GridSearchCV
-    parameters = {'kernel': ['rbf'], 'C': np.linspace(0.1, 10, 20)}
-    svc = SVM()
-    clf = GridSearchCV(svc, parameters, n_jobs=-1)
+    parameters = {'kernel': ['rbf'], 'C': np.linspace(0.1, 20, 20)}
+    svc = SVC()
+    clf = GridSearchCV(svc, parameters, n_jobs=-1, verbose=1)
     clf.fit(X_, y)
     print clf.best_estimator_
     print clf.best_score_
 
 if __name__ == '__main__':
-    test(10)
-    #submission()
+    #test()
+    submission()
     #grid_search()
