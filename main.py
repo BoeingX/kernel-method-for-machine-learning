@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.datasets import make_classification
 sys.path.append('modules')
 from modules.svm import SVM
-from modules.helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
+from modules.helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split, timefn
 from modules.mycv import hog
 from sklearn.svm import SVC
 #from skimage.feature import hog
@@ -29,6 +29,7 @@ def test_io():
     y_train = load_label('data/Ytr.csv')
     save_label(y_train, 'data/Yte.csv')
 
+@timefn
 def submission():
     print '[INFO] Loading data'
     X_train = load_image('data/Xtr.csv')

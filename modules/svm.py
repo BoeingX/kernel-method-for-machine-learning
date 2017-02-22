@@ -1,3 +1,4 @@
+from itertools import combinations
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
 import cvxopt
@@ -55,40 +56,60 @@ class SVM(Base):
         b, _, _ = fmin_l_bfgs_b(f, b, approx_grad=True)
         return b
 
-    def _fit_single(self, K, y_bin, i):
-        print '[INFO] fitting class %d' % i
-        y = y_bin[:, i]
+    def _fit_binary(self, X, y):
+        y_unique = np.unique(y)
+        assert np.array_equal(y_unique, np.asarray([-1, 1]))
+        n_classes = len(y_unique)
+        n_samples, n_features = X.shape
+        if self.gamma == 'auto':
+            self.gamma = 1.0 / n_features
+        K = pdist(X, self.kernel, self.gamma)
         P, q, G, h, A, b  = _prepare_input_for_cvxopt(K, y, self.C, len(y))
         sol = solvers.qp(P, q, G, h, A, b)
         alpha = np.asarray(sol['x']).ravel()
         b = _find_b(alpha, K, y)
-        return np.concatenate((alpha, np.asarray(b)))
+        return alpha, b
 
     def fit(self, X, y):
         self.X = X
-        n_classes = len(np.unique(y))
+        self.y = y
+        y_unique = np.unique(y)
+        n_classes = len(y_unique)
         n_samples, n_features = X.shape
-        if self.gamma == 'auto':
-            self.gamma = 1.0 / n_features
-#        if self.kernel == 'rbf':
-#            self.f = lambda x, y: rbf(x, y, self.gamma)
-#        elif self.kernel == 'linear':
-#            self.f = linear
-#        else:
-#            pass
-        K = pdist(X, self.kernel, self.gamma)
-        y_bin = binarize(y)
-        pool = Pool(4)
-        alphas_bs = np.asarray(pool.map(lambda x: self._fit_single(K, y_bin, x), range(n_classes)))
-        self.alphas = alphas_bs[:, :-1]
-        self.bs = alphas_bs[:, -1]
+        self.n_classes = n_classes
+        self.pairs = list(combinations(y_unique, r = 2))
+        self.alphas = {}
+        self.bs = {}
+        # loop over pairs
+        for pair in self.pairs:
+            idx1 = np.where(y == pair[0])
+            idx2 = np.where(y == pair[1])
+            X1 = X[idx1]
+            y1 = np.ones(len(X1))
+            X2 = X[idx2]
+            y2 = -np.ones(len(X2))
+            X_ = np.concatenate([X1, X2], axis = 0)
+            y_ = np.concatenate([y1, y2])
+            self.alphas[pair], self.bs[pair] = self._fit_binary(X_, y_)
         self._is_fitted = True
 
     def predict(self, X):
         if not self._is_fitted:
             print '[Warning] Classifier is not yet fitted.'
-        K = cdist(self.X, X, self.kernel, self.gamma)
-        fs = np.dot(self.alphas, K)
-        fs += np.multiply(self.bs.reshape(-1, 1), np.ones_like(fs))
-        y = np.argmax(fs, axis = 0)
-        return y
+        count = np.zeros((self.n_classes, len(X)))
+        for pair in self.pairs:
+            idx1 = np.where(self.y == pair[0])
+            idx2 = np.where(self.y == pair[1])
+            X1 = self.X[idx1]
+            X2 = self.X[idx2]
+            X_ = np.concatenate([X1, X2], axis = 0)
+            K = cdist(X_, X, self.kernel, self.gamma)
+            fs = np.dot(self.alphas[pair], K)
+            fs += np.multiply(self.bs[pair], np.ones_like(fs))
+            fs = np.sign(fs)
+            for idx, sgn in enumerate(fs):
+                if sgn == 1:
+                    count[pair[0], idx] += 1
+                else:
+                    count[pair[1], idx] += 1
+        return np.argmax(count, axis = 0)
