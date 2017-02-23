@@ -1,6 +1,5 @@
 import numpy as np
-from sklearn.base import BaseEstimator
-class Base(BaseEstimator):
+class Base():
     def __init__(self):
         pass
     def fit(self, X, y):

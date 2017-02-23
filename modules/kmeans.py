@@ -33,7 +33,7 @@ class KMeans():
             loss = np.sum(np.min(dist, axis = 1))
             if loss < self.tol or num_iter > self.max_iter:
                 return centers, labels, loss
-            for i in xrange(self.n_clusters):
+            for i in range(self.n_clusters):
                 centers[i] = np.mean(X[labels == i], axis = 0)
             num_iter += 1
 
@@ -43,7 +43,7 @@ class KMeans():
             self.centers_all_ = np.empty((0, X.shape[1]))
             self.labels_all_ = np.empty((0))
             self.loss_all_ = np.empty((0))
-        for i in xrange(self.n_init):
+        for i in range(self.n_init):
             centers, labels, loss = self.fit_(X)
             if self.compare_randomization:
                 self.centers_all_ = np.append(self.centers_all_, centers, axis = 0)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     kmeans = KMeans(n_clusters = 4, compare_randomization = True)
 
-    print kmeans.score(data)
+    print(kmeans.score(data))
     sys.exit(0)
 
 

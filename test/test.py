@@ -8,10 +8,10 @@ if __name__ == '__main__':
 
     svm = SVM(kernel = 'linear', tol = 1e-10)
     svm.fit(X, y)
-    print svm.score(X, y)
-    print svm.bs
+    print(svm.score(X, y))
+    print(svm.bs)
 
     svc = SVC(kernel='linear')
     svc.fit(X, y)
-    print svc.score(X, y)
-    print svc.intercept_
+    print(svc.score(X, y))
+    print(svc.intercept_)

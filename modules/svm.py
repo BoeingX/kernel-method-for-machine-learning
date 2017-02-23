@@ -100,7 +100,7 @@ class SVM(Base):
 
     def predict(self, X):
         if not self._is_fitted:
-            print '[Warning] Classifier is not yet fitted.'
+            print('[Warning] Classifier is not yet fitted.')
         count = np.zeros((self.n_classes, len(X)))
         for pair in self.pairs:
             idx1 = np.where(self.y == pair[0])

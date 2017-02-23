@@ -11,14 +11,14 @@ except NameError:
 
 def binarize(y):
     if y.ndim != 1:
-        print '[Warning] y is not a vector! Reshaping...'
+        print('[Warning] y is not a vector! Reshaping...')
         y = y.ravel()
     y = np.asarray(y, dtype = int)
     n_samples = len(y)
     n_classes = len(np.unique(y))
     y_bin = -np.ones((n_samples, n_classes))
     #TODO: handle the case where original labels are arbitrary
-    for i in xrange(n_samples):
+    for i in range(n_samples):
         y_bin[i][y[i]] = 1
     return y_bin
 
@@ -80,7 +80,7 @@ def load_image(filename, grayscale = True, max_rows = None):
     else:
         X = np.genfromtxt(filename, delimiter=',', max_rows = max_rows)[:, :-1]
     n_images, n_channels = X.shape
-    n_dim = n_channels / 3
+    n_dim = int(n_channels / 3)
     if grayscale:
         R = X[:, :n_dim]
         G = X[:, n_dim:2*n_dim]
@@ -106,8 +106,9 @@ def save_label(y, filename):
 def train_test_split(X, y, test_ratio = 0.1):
     n_test = np.int(len(X) * test_ratio)
     idx_test = set(np.random.choice(len(X), n_test, replace = False))
-    idx_train = filter(lambda x: x not in idx_test, xrange(len(X)))
+    idx_train = filter(lambda x: x not in idx_test, range(len(X)))
     idx_test = list(idx_test)
+    idx_train = list(idx_train)
     return X[idx_train, :], y[idx_train], X[idx_test, :], y[idx_test]
 
 def img2vec(X, transformer, y = None, bt = False, length = 128):
