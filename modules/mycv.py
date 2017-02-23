@@ -15,10 +15,8 @@ def gradient(X):
 
 def card2polar(X, Y):
     mag = np.sqrt(X**2 + Y**2)
-    #ang = (np.arctan2(Y, X + 1e-15) / np.pi + 1) * 180
-    #ang = np.abs((np.arctan2(Y, X + 1e-15) / np.pi) * 180)
-    ang = np.arctan2(Y, (X + 1e-15)) * (180 / np.pi) + 90
-
+    ang = np.arctan2(Y, (X + 1e-15)) * (180 / np.pi) + 180
+    ang[np.where(ang > 180)] -= 180
     return mag, ang
 
 def normalize(X):
@@ -60,21 +58,6 @@ def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1',
             hst_sub /= (np.sum(hst_sub) + 1e-5)
             hist = np.concatenate((hist, hst_sub))
     return hist
-    #orientations = 8
-    #orientation_histogram = np.zeros((ncx, ncy, orientations))
-    #for i in range(orientations):
-    #    #create new integral image for this orientation
-    #    # isolate orientations in this range
-
-    #    temp_ori = np.where(ang < 180 / orientations * (i + 1),
-    #                        ang, 0)
-    #    temp_ori = np.where(ang >= 180 / orientations * i,
-    #                        temp_ori, 0)
-    #    # select magnitudes for those orientations
-    #    cond2 = temp_ori > 0
-    #    temp_mag = np.where(cond2, magnitude, 0)
-
-    #    orientation_histogram[:,:,i] = uniform_filter(temp_mag, size=(cx, cy))[cx/2::cx, cy/2::cy].T
 
 def bootstrap(X, y):
     sx, sy = X.shape
