@@ -50,7 +50,6 @@ def test(cv = 3):
     print '[INFO] Loading data'
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
-    y -= 1
     print '[INFO] Computing histogram of gradients'
     X_, y = img2vec(X, hog, y, bt = True, length = 144)
 
@@ -61,7 +60,7 @@ def test(cv = 3):
         print '[INFO] Fold No. %d' % (i+1)
         X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
         print '[INFO] Fitting SVM'
-        clf = SVC(C = 10)
+        clf = SVM(C = 10)
         clf.fit(X_train, y_train)
         print '[INFO] Predicting'
         scores_train[i] = clf.score(X_train, y_train)
@@ -73,7 +72,6 @@ def test(cv = 3):
 def grid_search():
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
-    y -= 1
     print '[INFO] Computing histogram of gradients'
     #X_ = img2vec(X, lambda x: hog(x, orientations=8, pixels_per_cell=(8,8), cells_per_block=(1,1)), y)
     X_, y = img2vec(X, hog, y, bt = True, length = 144)
@@ -86,6 +84,6 @@ def grid_search():
     print clf.best_score_
 
 if __name__ == '__main__':
-    #test()
-    submission()
+    test()
+    #submission()
     #grid_search()
