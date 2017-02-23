@@ -129,6 +129,9 @@ def img2vec(X, transformer, y = None, bt = False, length = 128):
     else:
         return X_vec
 
+def bow(X, transformer, y = None, bt = False):
+    pass
+
 def timefn(fn):
     @wraps(fn)
     def measure_time(*args, **kwargs):

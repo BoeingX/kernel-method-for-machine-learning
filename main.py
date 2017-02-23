@@ -50,28 +50,30 @@ def submission():
     print('[INFO] Writing results to disk')
     save_label(y_test, 'data/Yte.csv')
 
-def test(cv = 3):
+def test(cv = 5):
     print('[INFO] Loading data')
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
     print '[INFO] Computing histogram of gradients'
-    X_, y = img2vec(X, hog, y, bt = True, length = 144)
-
-    scores_train = [None]*cv
-    scores = [None]*cv
-    #for i in xrange(cv):
-    for i in xrange(1):
-        print '[INFO] Fold No. %d' % (i+1)
-        X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
-        print '[INFO] Fitting SVM'
-        clf = SVM(C = 10)
-        clf.fit(X_train, y_train)
-        print('[INFO] Predicting')
-        scores_train[i] = clf.score(X_train, y_train)
-        scores[i] = clf.score(X_test, y_test)
-    print(scores_train)
-    print(scores)
+    X_, y = img2vec(X, hog, y, bt = False, length = 144)
+    from sklearn.model_selection import cross_val_score
+    clf = SVC(C = 10)
+    scores = cross_val_score(clf, X_, y, cv=cv)
     print(np.mean(scores))
+    #scores_train = [None]*cv
+    #scores = [None]*cv
+    #for i in xrange(cv):
+    #    print '[INFO] Fold No. %d' % (i+1)
+    #    X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
+    #    print '[INFO] Fitting SVM'
+    #    clf = SVC(C = 10)
+    #    clf.fit(X_train, y_train)
+    #    print('[INFO] Predicting')
+    #    scores_train[i] = clf.score(X_train, y_train)
+    #    scores[i] = clf.score(X_test, y_test)
+    #print(scores_train)
+    #print(scores)
+    #print(np.mean(scores))
 
 def grid_search():
     X = load_image('data/Xtr.csv')

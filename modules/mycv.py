@@ -31,7 +31,7 @@ def normalize(X):
     X = (X - min_val) / (max_val - min_val)
     return 255*X
 
-def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1', transform_sqrt = False):
+def hog(X, pixels_per_cell = (8,8), cells_per_block = (1, 1), orientations = 9, transform_sqrt = False):
     # if X if a 1D vector
     if X.ndim == 1:
         n_dim = int(np.sqrt(len(X)))
@@ -63,6 +63,24 @@ def hog(X, pixels_per_cell = (8,8), cells_per_block = (3, 3), block_norm = 'L1',
             hst_sub /= (np.sum(hst_sub) + 1e-5)
             hist = np.concatenate((hist, hst_sub))
     return hist
+    #hist = np.zeros((ncx, ncy, orientations))
+    #bins = [(180/orientations * i, 180/orientations * (i+1)) for i in range(orientations)]
+    #from scipy.ndimage.filters import uniform_filter
+    #for i in range(orientations):
+    #    tmp = np.where((ang >= bins[i][0]) & (ang < bins[i][1]), ang, 0)
+    #    cond = tmp > 0
+    #    tmp = np.where(cond, mag, 0)
+    #    hist[:, :, i] = uniform_filter(tmp, size=(cx, cy))[cx / 2::cx, cy / 2::cy].T
+    #n_blocksx = (ncx - bx) + 1
+    #n_blocksy = (ncy - by) + 1
+    #hist_normalized = np.zeros((n_blocksx, n_blocksy,
+    #                              bx, by, orientations))
+    #for x in range(n_blocksx):
+    #    for y in range(n_blocksy):
+    #        block = hist[x:x + bx, y:y + by, :]
+    #        eps = 1e-5
+    #        hist_normalized[x, y, :] = block / np.sqrt(block.sum() ** 2 + eps)
+    #return hist_normalized.ravel()
 
 
 def bootstrap(X, y):

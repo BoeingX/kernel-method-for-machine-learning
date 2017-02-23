@@ -86,7 +86,8 @@ class SVM(Base):
         self.alphas = {}
         self.bs = {}
         # loop over pairs
-        for pair in self.pairs:
+        for idx, pair in enumerate(self.pairs):
+            print('[INFO] fitting class %d/%d' % (idx+1, len(self.pairs)))
             idx1 = np.where(y == pair[0])
             idx2 = np.where(y == pair[1])
             X1 = X[idx1]
