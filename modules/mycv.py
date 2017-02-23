@@ -88,7 +88,7 @@ def bootstrap(X, y):
         X_[5*i + 2] = np.pad(img[:, :-1], ((0, 0), (1, 0)), 'constant', constant_values=0).ravel()
         X_[5*i + 3] = np.pad(img[1:, :], ((0, 1), (0, 0)), 'constant', constant_values=0).ravel()
         X_[5*i + 4] = np.pad(img[:-1, :], ((1, 0), (0, 0)), 'constant', constant_values=0).ravel()
-    return X_, np.repeat(y, 5)
+    return X_, np.asarray(np.repeat(y, 5), dtype = int)
     ## reflection
     #X_ = np.zeros((sx*4, sy))
     #for i in range(sx):

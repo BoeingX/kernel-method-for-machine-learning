@@ -40,11 +40,11 @@ def submission():
     X_test_ = img2vec(X_test, hog, length = 144)
     print '[INFO] Fitting SVM'
     clf = SVM(C = 10)
-    clf.fit(X_train_, y_train-1)
+    clf.fit(X_train_, y_train)
     print '[INFO] Predicting'
     y_test = clf.predict(X_test_)
     print '[INFO] Writing results to disk'
-    save_label(y_test+1, 'data/Yte.csv')
+    save_label(y_test, 'data/Yte.csv')
 
 def test(cv = 3):
     print '[INFO] Loading data'
