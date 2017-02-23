@@ -10,6 +10,11 @@ from multiprocessing.dummy import Pool
 from base import Base
 from helper import binarize, pdist, cdist
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 def _prepare_input_for_cvxopt(K, y, C, n):
     P = 2*matrix(K, tc = 'd')
     q = -2*matrix(y, tc = 'd')

@@ -10,6 +10,11 @@ from modules.mycv import hog
 from sklearn.svm import SVC
 #from skimage.feature import hog
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 def test_svm():
     X, y = make_classification(n_samples=100, n_informative=5, n_classes = 2, random_state = 20)
 

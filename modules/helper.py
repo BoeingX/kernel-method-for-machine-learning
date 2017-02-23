@@ -4,6 +4,11 @@ import time
 from functools import wraps
 from mycv import bootstrap
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 def binarize(y):
     if y.ndim != 1:
         print '[Warning] y is not a vector! Reshaping...'

@@ -7,6 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 class KMeans():
     def __kmeans_rand_init__(self, X, k):
         return X[np.random.choice(range(len(X)), k)]

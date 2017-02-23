@@ -2,6 +2,11 @@ import numpy as np
 import warnings
 warnings.filterwarnings("error")
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 def gradient(X):
     X = np.asarray(X, dtype = float)
     grad_X = np.zeros_like(X)
