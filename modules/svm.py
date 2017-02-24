@@ -78,7 +78,7 @@ class SVM(Base):
     def fit(self, X, y):
         self.X = X
         self.y = y
-        y_unique = np.unique(y)
+        y_unique = np.asarray(np.unique(y), dtype = int)
         n_classes = len(y_unique)
         n_samples, n_features = X.shape
         self.n_classes = n_classes

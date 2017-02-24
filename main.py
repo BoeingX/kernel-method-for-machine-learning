@@ -40,8 +40,8 @@ def submission():
     X_test = load_image('data/Xte.csv')
     y_train = load_label('data/Ytr.csv')
     print('[INFO] Computing histogram of gradients')
-    X_train_, y_train = img2vec(X_train, hog, y_train, bt = True, length = 144)
-    X_test_ = img2vec(X_test, hog, length = 144)
+    X_train_, y_train = img2vec(X_train, hog, y_train, bt = False, length = 414)
+    X_test_ = img2vec(X_test, hog, length = 414)
     print('[INFO] Fitting SVM')
     clf = SVM(C = 10)
     clf.fit(X_train_, y_train)
@@ -55,16 +55,25 @@ def test(cv = 5):
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
     print '[INFO] Computing histogram of gradients'
-    X_, y = img2vec(X, hog, y, bt = False, length = 144)
+    #from skimage.feature import hog as skhog
+    #X_, y = img2vec(X, lambda x: skhog(x, orientations=9, pixels_per_cell=(8,8), cells_per_block=(1,1), visualise=False), y, bt = False, length = 144)
+    X_, y = img2vec(X, hog, y, bt = False, length = 414)
+
     from sklearn.model_selection import cross_val_score
-    clf = SVC(C = 10)
-    scores = cross_val_score(clf, X_, y, cv=cv)
+
+    clf = SVC(C = 10, kernel = 'rbf')
+    scores = cross_val_score(clf, X_, y, cv=cv, n_jobs=-1)
+
     print(np.mean(scores))
+
     #scores_train = [None]*cv
     #scores = [None]*cv
     #for i in xrange(cv):
     #    print '[INFO] Fold No. %d' % (i+1)
     #    X_train, y_train, X_test, y_test = train_test_split(X_, y, 1.0 / cv)
+    #    mean_img = np.mean(X_train, axis = 0)
+    #    X_train -= mean_img
+    #    X_test -= mean_img
     #    print '[INFO] Fitting SVM'
     #    clf = SVC(C = 10)
     #    clf.fit(X_train, y_train)
@@ -80,9 +89,9 @@ def grid_search():
     y = load_label('data/Ytr.csv')
     print('[INFO] Computing histogram of gradients')
     #X_ = img2vec(X, lambda x: hog(x, orientations=8, pixels_per_cell=(8,8), cells_per_block=(1,1)), y)
-    X_, y = img2vec(X, hog, y, bt = True, length = 144)
+    X_, y = img2vec(X, hog, y, bt = False, length = 36*9)
     from sklearn.model_selection import GridSearchCV
-    parameters = {'kernel': ['rbf'], 'C': np.linspace(0.1, 20, 20)}
+    parameters = {'kernel': ['rbf'], 'C': np.linspace(0.01, 20, 20)}
     svc = SVC()
     clf = GridSearchCV(svc, parameters, n_jobs=-1, verbose=1)
     clf.fit(X_, y)
@@ -90,6 +99,6 @@ def grid_search():
     print(clf.best_score_)
 
 if __name__ == '__main__':
-    test()
-    #submission()
+    #test()
     #grid_search()
+    submission()

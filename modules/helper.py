@@ -9,6 +9,7 @@ try:
 except NameError:
     xrange = range
 
+
 def binarize(y):
     if y.ndim != 1:
         print('[Warning] y is not a vector! Reshaping...')
@@ -33,6 +34,15 @@ def pdist(X, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
         return np.dot(X, X.T)
     elif kernel == 'polynomial':
         pass
+    elif kernel == 'laplacian':
+        K = np.empty((n, n))
+        lap = lambda x, y: np.exp(-gamma*np.linalg.norm(x - y, ord = 1))
+        for i in xrange(n):
+            for j in xrange(i, n):
+                d = lap(X[i], X[j])
+                K[i, j] = d
+                K[j, i] = d
+        return K
     else:
         pass
 
@@ -48,6 +58,13 @@ def cdist(X, Y, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
         return np.dot(X, Y.T)
     elif kernel == 'polynomial':
         pass
+    elif kernel == 'laplacian':
+        K = np.empty((n1, n2))
+        lap = lambda x, y: np.exp(-gamma*np.linalg.norm(x - y, ord = 1))
+        for i in xrange(n1):
+            for j in xrange(n2):
+                K[i, j] = lap(X[i], Y[j])
+        return K
     else:
         pass
 
@@ -119,10 +136,10 @@ def img2vec(X, transformer, y = None, bt = False, length = 128):
     for i, img in enumerate(X):
         if img.ndim == 1:
             img = img.reshape(ndim, ndim)
-        x_vec = transformer(img)
-        #x_vec = np.empty(0)
-        #for pixels_per_cell in [(8, 8), (16, 16), (32, 32)]:
-        #    x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
+        #x_vec = transformer(img)
+        x_vec = np.empty(0)
+        for pixels_per_cell in [(5, 5), (10, 10), (30, 30)]:
+            x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
         X_vec[i] = x_vec
     if y is not None:
         return X_vec, y
