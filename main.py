@@ -2,7 +2,6 @@ import os
 import sys
 import sys
 import numpy as np
-from sklearn.datasets import make_classification
 sys.path.append('modules')
 from modules.svm import SVM
 from modules.helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
@@ -10,6 +9,7 @@ from modules.timefn import timefn
 from modules.mycv import hog
 #TODO: remove sklearn dependency
 from sklearn.svm import SVC
+from sklearn.datasets import make_classification
 
 try:
     xrange
