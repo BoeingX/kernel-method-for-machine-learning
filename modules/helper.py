@@ -1,14 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 from functools import wraps
-from mycv import bootstrap
 
 try:
     xrange
 except NameError:
     xrange = range
-
 
 def binarize(y):
     if y.ndim != 1:
@@ -128,6 +125,22 @@ def train_test_split(X, y, test_ratio = 0.1):
     idx_train = list(idx_train)
     return X[idx_train, :], y[idx_train], X[idx_test, :], y[idx_test]
 
+
+def bootstrap(X, y):
+    """Bootstrap training data by shifting image by 1 pixel in four directions."""
+    sx, sy = X.shape
+    ndim = int(np.sqrt(sy))
+    # translation
+    X_ = np.zeros((sx*5, sy))
+    for i in range(sx):
+        X_[5*i] = X[i]
+        img = X[i].reshape(ndim, ndim)
+        X_[5*i + 1] = np.pad(img[:, 1:], ((0, 0), (0, 1)), 'constant', constant_values=0).ravel()
+        X_[5*i + 2] = np.pad(img[:, :-1], ((0, 0), (1, 0)), 'constant', constant_values=0).ravel()
+        X_[5*i + 3] = np.pad(img[1:, :], ((0, 1), (0, 0)), 'constant', constant_values=0).ravel()
+        X_[5*i + 4] = np.pad(img[:-1, :], ((1, 0), (0, 0)), 'constant', constant_values=0).ravel()
+    return X_, np.asarray(np.repeat(y, 5), dtype = int)
+
 def img2vec(X, transformer, y = None, bt = False, length = 128):
     if bt and (y is not None):
         X, y = bootstrap(X, y)
@@ -149,12 +162,3 @@ def img2vec(X, transformer, y = None, bt = False, length = 128):
 def bow(X, transformer, y = None, bt = False):
     pass
 
-def timefn(fn):
-    @wraps(fn)
-    def measure_time(*args, **kwargs):
-        t1 = time.time()
-        result = fn(*args, **kwargs)
-        t2 = time.time()
-        print ("@timefn:" + fn.func_name + " took " + str(t2 - t1) + " seconds")
-        return result
-    return measure_time

@@ -5,33 +5,16 @@ import numpy as np
 from sklearn.datasets import make_classification
 sys.path.append('modules')
 from modules.svm import SVM
-from modules.helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split, timefn
+from modules.helper import binarize, pdist, preview, load_label, load_image, save_label, img2vec, train_test_split
+from modules.timefn import timefn
 from modules.mycv import hog
+#TODO: remove sklearn dependency
 from sklearn.svm import SVC
 
 try:
     xrange
 except NameError:
     xrange = range
-
-def test_svm():
-    X, y = make_classification(n_samples=100, n_informative=5, n_classes = 2, random_state = 20)
-
-    svm = SVM(kernel = 'linear', tol = 1e-10)
-    svm.fit(X, y)
-    print(svm.score(X, y))
-    print(svm.bs)
-
-    svc = SVC(kernel='linear', decision_function_shape = 'ovr')
-    svc.fit(X, y)
-    print(svc.score(X, y))
-    print(svc.intercept_)
-
-def test_io():
-    X_train = load_image('data/Xtr.csv')
-    X_test = load_image('data/Xte.csv')
-    y_train = load_label('data/Ytr.csv')
-    save_label(y_train, 'data/Yte.csv')
 
 @timefn
 def submission():
@@ -40,10 +23,10 @@ def submission():
     X_test = load_image('data/Xte.csv')
     y_train = load_label('data/Ytr.csv')
     print('[INFO] Computing histogram of gradients')
-    X_train_, y_train = img2vec(X_train, hog, y_train, bt = False, length = 144)
+    X_train_, y_train = img2vec(X_train, hog, y_train, bt = True, length = 144)
     X_test_ = img2vec(X_test, hog, length = 144)
     print('[INFO] Fitting SVM')
-    clf = SVM(C = 2.15, gamma = 1.0)
+    clf = SVM(C = 2.15, gamma = 1.0, kernel = 'rbf')
     clf.fit(X_train_, y_train)
     print('[INFO] Predicting')
     y_test = clf.predict(X_test_)
@@ -56,8 +39,9 @@ def test(cv = 5):
     y = load_label('data/Ytr.csv')
     print '[INFO] Computing histogram of gradients'
     #from skimage.feature import hog as skhog
+    #from modules._hog import hog as skhog
     #X_, y = img2vec(X, lambda x: skhog(x, orientations=9, pixels_per_cell=(8,8), cells_per_block=(1,1), visualise=False), y, bt = False, length = 144)
-    X_, y = img2vec(X, hog, y, bt = False, length = 144)
+    X_, y = img2vec(X, hog, y, bt = True, length = 144)
 
     from sklearn.model_selection import cross_val_score
     clf = SVC(C = 2.15, gamma = 1.0, kernel = 'rbf')
@@ -98,5 +82,5 @@ def grid_search():
 
 if __name__ == '__main__':
     #test()
-    grid_search()
-    #submission()
+    #grid_search()
+    submission()
