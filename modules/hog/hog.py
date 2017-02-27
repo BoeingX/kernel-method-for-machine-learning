@@ -1,41 +1,5 @@
 import numpy as np
-import warnings
-warnings.filterwarnings("error")
-
-try:
-    xrange
-except NameError:
-    xrange = range
-
-def gradient(X):
-    """Calculate discrete gradient of an image by [-1, 0, 1] filter."""
-    X = np.asarray(X, dtype = float)
-
-    grad_X = np.empty_like(X)
-    grad_X[:, 0] = 0
-    grad_X[:, -1] = 0
-    grad_X[:, 1:-1] = X[:, 2:] - X[:, :-2]
-
-    grad_Y = np.empty_like(X)
-    grad_X[0, :] = 0
-    grad_X[-1, :] = 0
-    grad_Y[1:-1, :] = X[2:, :] - X[:-2, :]
-    return grad_X, grad_Y
-
-def card2polar(X, Y):
-    """Cartesian to polar coordinate system."""
-    mag = np.sqrt(X**2 + Y**2)
-    ang = np.rad2deg(np.arctan2(Y, X)) % 180
-    return mag, ang
-
-def normalize(X):
-    """Normalize an image to [0,255]."""
-    #TODO: RGB-image support
-    X = np.asarray(X, dtype = float)
-    min_val = X.min()
-    max_val = X.max()
-    X = (X - min_val) / (max_val - min_val)
-    return 255 * X
+from modules.misc.mycv import normalize, gradient, card2polar
 
 def hog(X, orientations = 9, pixels_per_cell = (8,8), transform_sqrt = False):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.

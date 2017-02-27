@@ -1,3 +1,4 @@
+from functools import wraps
 import time
 def timefn(fn):
     """Mesure execution time of a function"""

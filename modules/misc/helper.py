@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from functools import wraps
 
 try:
     xrange
@@ -65,58 +63,6 @@ def cdist(X, Y, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
     else:
         pass
 
-def rgb2grayscale(R, G, B):
-    return 0.2126*R + 0.7152*G + 0.0722*B
-
-def preview(X, size = 9):
-    """Preview grayscale image
-    """
-    # suppose size is perfect square
-    assert np.sqrt(size).is_integer()
-    width = np.int(np.sqrt(size))
-    # TODO: fix imgs, choice only take 1d array
-    idxs = np.random.choice(len(X), size = size, replace = False)
-    for i, idx in enumerate(idxs):
-        img = X[idx]
-        if X[idx].ndim == 1:
-            n_dim = np.int(np.sqrt(len(X[idx])))
-            img = img.reshape(n_dim, n_dim)
-        plt.subplot(width, width, i+1)
-        plt.imshow(img, cmap=plt.cm.binary)
-        plt.axis('off')
-    plt.tight_layout()
-    plt.show()
-
-# Data IO
-def load_image(filename, grayscale = True, max_rows = None):
-    if max_rows == 1:
-        X = np.genfromtxt(filename, delimiter=',', max_rows = max_rows)[:-1]
-    else:
-        X = np.genfromtxt(filename, delimiter=',', max_rows = max_rows)[:, :-1]
-    n_images, n_channels = X.shape
-    n_dim = int(n_channels / 3)
-    if grayscale:
-        R = X[:, :n_dim]
-        G = X[:, n_dim:2*n_dim]
-        B = X[:, 2*n_dim:]
-        return rgb2grayscale(R, G, B)
-    else:
-        #TODO: handle RGB image
-        pass
-
-def load_label(filename):
-    y = np.genfromtxt(filename, delimiter=',', skip_header=1)[:, 1]
-    return y
-
-def save_label(y, filename):
-    n_samples = len(y)
-    ids = np.asarray(range(1, n_samples + 1))
-    Yte = np.empty((n_samples, 2))
-    Yte[:, 0] = ids
-    Yte[:, 1] = y
-    with open(filename, 'w') as f:
-        np.savetxt(f, Yte, '%d', delimiter = ',', newline = '\n', header = 'Id,Prediction', comments = '')
-
 def train_test_split(X, y, test_ratio = 0.1):
     n_test = np.int(len(X) * test_ratio)
     idx_test = set(np.random.choice(len(X), n_test, replace = False))
@@ -124,7 +70,6 @@ def train_test_split(X, y, test_ratio = 0.1):
     idx_test = list(idx_test)
     idx_train = list(idx_train)
     return X[idx_train, :], y[idx_train], X[idx_test, :], y[idx_test]
-
 
 def bootstrap(X, y):
     """Bootstrap training data by shifting image by 1 pixel in four directions."""
@@ -140,25 +85,3 @@ def bootstrap(X, y):
         X_[5*i + 3] = np.pad(img[1:, :], ((0, 1), (0, 0)), 'constant', constant_values=0).ravel()
         X_[5*i + 4] = np.pad(img[:-1, :], ((1, 0), (0, 0)), 'constant', constant_values=0).ravel()
     return X_, np.asarray(np.repeat(y, 5), dtype = int)
-
-def img2vec(X, transformer, y = None, bt = False, length = 128):
-    if bt and (y is not None):
-        X, y = bootstrap(X, y)
-    X_vec = np.empty((len(X), length))
-    ndim = int(np.sqrt(len(X[0])))
-    for i, img in enumerate(X):
-        if img.ndim == 1:
-            img = img.reshape(ndim, ndim)
-        x_vec = transformer(img)
-        #x_vec = np.empty(0)
-        #for pixels_per_cell in [(5, 5), (10, 10), (30, 30)]:
-        #    x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
-        X_vec[i] = x_vec
-    if y is not None:
-        return X_vec, y
-    else:
-        return X_vec
-
-def bow(X, transformer, y = None, bt = False):
-    pass
-
