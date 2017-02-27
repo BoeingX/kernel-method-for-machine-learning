@@ -29,17 +29,20 @@ def pdist(X, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
         return np.dot(X, X.T)
     elif kernel == 'polynomial':
         pass
-    elif kernel == 'laplacian':
+    else:
         K = np.empty((n, n))
-        lap = lambda x, y: np.exp(-gamma*np.linalg.norm(x - y, ord = 1))
+        if kernel == 'laplacian':
+            f = lambda x, y: np.exp(-gamma*np.linalg.norm(x - y, ord = 1))
+        elif kernel == 'intersection':
+            f = lambda x, y: np.sum(np.minimum(x, y))
+        else:
+            pass
         for i in xrange(n):
             for j in xrange(i, n):
-                d = lap(X[i], X[j])
+                d = f(X[i], X[j])
                 K[i, j] = d
                 K[j, i] = d
         return K
-    else:
-        pass
 
 def cdist(X, Y, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
     n1 = len(X)
@@ -53,15 +56,16 @@ def cdist(X, Y, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
         return np.dot(X, Y.T)
     elif kernel == 'polynomial':
         pass
-    elif kernel == 'laplacian':
+    else:
         K = np.empty((n1, n2))
-        lap = lambda x, y: np.exp(-gamma*np.linalg.norm(x - y, ord = 1))
+        if kernel == 'laplacian':
+            f = lambda x, y: np.exp(-gamma*np.linalg.norm(x - y, ord = 1))
+        elif kernel == 'intersection':
+            f = lambda x, y: np.sum(np.minimum(x, y))
         for i in xrange(n1):
             for j in xrange(n2):
-                K[i, j] = lap(X[i], Y[j])
+                K[i, j] = f(X[i], Y[j])
         return K
-    else:
-        pass
 
 def train_test_split(X, y, test_ratio = 0.1):
     n_test = np.int(len(X) * test_ratio)

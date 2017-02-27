@@ -41,7 +41,7 @@ def test(cv = 5):
     X_, y = img2vec(X, hog, y, bt = False, length = 144)
 
     from sklearn.model_selection import cross_val_score
-    clf = SVC(C = 2.15, gamma = 1.0, kernel = 'rbf')
+    clf = SVM(C = 2.15, gamma = 1.0, kernel = 'rbf')
     scores = cross_val_score(clf, X_, y, cv=cv, n_jobs=-1)
 
     print(np.mean(scores))
