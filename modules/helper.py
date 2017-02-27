@@ -136,10 +136,10 @@ def img2vec(X, transformer, y = None, bt = False, length = 128):
     for i, img in enumerate(X):
         if img.ndim == 1:
             img = img.reshape(ndim, ndim)
-        #x_vec = transformer(img)
-        x_vec = np.empty(0)
-        for pixels_per_cell in [(5, 5), (10, 10), (30, 30)]:
-            x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
+        x_vec = transformer(img)
+        #x_vec = np.empty(0)
+        #for pixels_per_cell in [(5, 5), (10, 10), (30, 30)]:
+        #    x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
         X_vec[i] = x_vec
     if y is not None:
         return X_vec, y
