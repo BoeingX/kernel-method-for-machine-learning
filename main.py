@@ -37,7 +37,7 @@ def test(cv = 5):
     print('[INFO] Loading data')
     X = load_image('data/Xtr.csv')
     y = load_label('data/Ytr.csv')
-    print '[INFO] Computing histogram of gradients'
+    print('[INFO] Computing histogram of gradients')
     X_, y = img2vec(X, hog, y, bt = False, length = 144)
 
     from sklearn.model_selection import cross_val_score

@@ -1,7 +1,7 @@
 import sys
-sys.path.append('../modules')
-from sklearn.datasets import make_classification
+sys.path.append('../modules/classifier')
 from svm import SVM
+from sklearn.datasets import make_classification
 from sklearn.svm import SVC
 if __name__ == '__main__':
     X, y = make_classification(n_samples=500, n_informative=5, n_classes = 10, random_state = 20)
