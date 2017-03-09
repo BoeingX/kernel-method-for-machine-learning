@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-
-"""KMeans.py: Perform k-means clustering."""
-
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -62,42 +58,3 @@ class KMeans():
         if not self.is_fitted_:
             self.fit(X)
         return self.loss_
-
-if __name__ == '__main__':
-
-    try:
-        data = np.loadtxt(sys.argv[1], delimiter = ' ')
-    except:
-        data = np.loadtxt('EMGaussian.data', delimiter = ' ')
-
-    kmeans = KMeans(n_clusters = 4, compare_randomization = True)
-
-    print(kmeans.score(data))
-    sys.exit(0)
-
-
-    plt.figure()
-    labels = kmeans.predict(data)
-    plt.scatter(data[:, 0], data[:, 1], c = labels, alpha = 0.3)
-    centers = kmeans.centers_
-    plt.scatter(centers[:, 0], centers[:, 1], c = range(len(centers)), s = 50)
-    plt.tight_layout()
-    plt.savefig('../report/imgs/q4a-1.pdf')
-    
-    plt.figure()
-    centers_all = kmeans.centers_all_
-    plt.scatter(data[:, 0], data[:, 1], c = 'gray', alpha = 0.3)
-    idx_init = np.asarray([])
-    for i in xrange(kmeans.n_init):
-        idx_init = np.append(idx_init, np.ones(kmeans.n_clusters)*i)
-    plt.scatter(centers_all[:, 0], centers_all[:, 1], c = idx_init, s = 60, alpha = 0.5)
-    plt.tight_layout()
-    plt.savefig('../report/imgs/q4a-2.pdf')
-
-    loss_all = kmeans.loss_all_
-    plt.figure()
-    plt.plot(loss_all, 'o-')
-    plt.xlabel('# of initialization')
-    plt.ylabel('Distortion')
-    plt.tight_layout()
-    plt.savefig('../report/imgs/q4a-3.pdf')

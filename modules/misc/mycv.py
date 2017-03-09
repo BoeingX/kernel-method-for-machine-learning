@@ -1,11 +1,7 @@
+from __future__ import print_function
 import numpy as np
 from matplotlib import pyplot as plt
 from modules.misc.helper import bootstrap
-
-try:
-    xrange
-except NameError:
-    xrange = range
 
 def gradient(X):
     """Calculate discrete gradient of an image by [-1, 0, 1] filter."""

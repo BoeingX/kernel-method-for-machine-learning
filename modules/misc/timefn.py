@@ -1,3 +1,4 @@
+from __future__ import print_function
 from functools import wraps
 import time
 def timefn(fn):
@@ -7,6 +8,6 @@ def timefn(fn):
         t1 = time.time()
         result = fn(*args, **kwargs)
         t2 = time.time()
-        print ("@timefn:" + fn.func_name + " took " + str(t2 - t1) + " seconds")
+        print("@timefn:" + fn.func_name + " took " + str(t2 - t1) + " seconds")
         return result
     return measure_time

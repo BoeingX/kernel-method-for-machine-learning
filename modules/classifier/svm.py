@@ -1,20 +1,14 @@
+from __future__ import print_function
 from itertools import combinations
-
 import cvxopt
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
-
 # Do not show optimization progress during optimization
 cvxopt.solvers.options['show_progress'] = False
 from cvxopt import matrix, solvers
 
 from modules.classifier.base import Base
 from modules.misc.helper import pdist, cdist
-
-try:
-    xrange
-except NameError:
-    xrange = range
 
 def _prepare_input_for_cvxopt(K, y, C, n):
     """Prepare input data for qp solver of cvxopt.

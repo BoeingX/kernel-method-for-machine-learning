@@ -1,9 +1,5 @@
+from __future__ import print_function
 import numpy as np
-
-try:
-    xrange
-except NameError:
-    xrange = range
 
 def binarize(y):
     if y.ndim != 1:

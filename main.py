@@ -1,8 +1,5 @@
-import sys
-
+from __future__ import print_function
 import numpy as np
-
-sys.path.append('modules')
 from modules.classifier.svm import SVM
 from modules.misc.mycv import img2vec
 from modules.misc.input_output import load_image, load_label, save_label
@@ -10,11 +7,6 @@ from modules.misc.timefn import timefn
 from modules.hog.hog import hog
 #TODO: remove sklearn dependency
 from sklearn.svm import SVC
-
-try:
-    xrange
-except NameError:
-    xrange = range
 
 @timefn
 def submission():

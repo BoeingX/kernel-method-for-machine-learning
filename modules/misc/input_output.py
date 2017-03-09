@@ -1,7 +1,6 @@
+from __future__ import print_function
 import numpy as np
-
 from modules.misc.mycv import rgb2grayscale
-
 
 def load_image(filename, grayscale = True, max_rows = None):
     if max_rows == 1:
