@@ -37,20 +37,18 @@ def normalize(X):
 def rgb2grayscale(R, G, B):
     return 0.2126*R + 0.7152*G + 0.0722*B
 
-def preview(X, size = 9):
+def preview(X, dim = (3,3)):
     """Preview grayscale image
     """
-    # suppose size is perfect square
-    assert np.sqrt(size).is_integer()
-    width = np.int(np.sqrt(size))
-    # TODO: fix imgs, choice only take 1d array
+    height, width = dim
+    size = width * height
     idxs = np.random.choice(len(X), size = size, replace = False)
     for i, idx in enumerate(idxs):
         img = X[idx]
         if X[idx].ndim == 1:
             n_dim = np.int(np.sqrt(len(X[idx])))
             img = img.reshape(n_dim, n_dim)
-        plt.subplot(width, width, i+1)
+        plt.subplot(height, width, i+1)
         plt.imshow(img, cmap=plt.cm.binary)
         plt.axis('off')
     plt.tight_layout()
@@ -61,13 +59,16 @@ def img2vec(X, transformer, y = None, bt = False, length = 128):
         X, y = bootstrap(X, y)
     X_vec = np.empty((len(X), length))
     ndim = int(np.sqrt(len(X[0])))
+    pixels_per_cell_lst = [(32, 32), (16, 16), (8, 8)]
+    weights = [0.25, 0.25, 0.5]
     for i, img in enumerate(X):
         if img.ndim == 1:
             img = img.reshape(ndim, ndim)
-        x_vec = transformer(img)
-        #x_vec = np.empty(0)
-        #for pixels_per_cell in [(5, 5), (10, 10), (30, 30)]:
-        #    x_vec = np.concatenate((x_vec, transformer(img, pixels_per_cell = pixels_per_cell)))
+        #x_vec = transformer(img)
+        x_vec = np.empty(0)
+        for idx in xrange(len(pixels_per_cell_lst)):
+            pixels_per_cell = pixels_per_cell_lst[idx]
+            x_vec = np.concatenate((x_vec, weights[idx]* transformer(img, pixels_per_cell = pixels_per_cell)))
         X_vec[i] = x_vec
     if y is not None:
         return X_vec, y
