@@ -5,8 +5,6 @@ from modules.misc.mycv import img2vec
 from modules.misc.input_output import load_image, load_label, save_label
 from modules.misc.timefn import timefn
 from modules.hog.hog import hog
-#TODO: remove sklearn dependency
-from sklearn.svm import SVC
 
 @timefn
 def submission():
@@ -25,33 +23,5 @@ def submission():
     print('[INFO] Writing results to disk')
     save_label(y_test, 'data/Yte.csv')
 
-def test(cv = 5):
-    print('[INFO] Loading data')
-    X = load_image('data/Xtr.csv')
-    y = load_label('data/Ytr.csv')
-    print('[INFO] Computing histogram of gradients')
-    X_, y = img2vec(X, hog, y, bt = False, length = 9*(1+4+16))
-
-    from sklearn.model_selection import cross_val_score
-    clf = SVC(C = 3.16, gamma = 1.0, kernel = 'rbf')
-    scores = cross_val_score(clf, X_, y, cv=cv, n_jobs=-1)
-
-    print(np.mean(scores))
-
-def grid_search():
-    from sklearn.model_selection import GridSearchCV
-    X = load_image('data/Xtr.csv')
-    y = load_label('data/Ytr.csv')
-    print('[INFO] Computing histogram of gradients')
-    X_, y = img2vec(X, hog, y, bt = False, length = 189)
-    parameters = {'kernel': ['rbf'], 'C': np.linspace(0.01, 20, 20), 'gamma': np.linspace(1.0/200, 1, 20)}
-    svc = SVC()
-    clf = GridSearchCV(svc, parameters, n_jobs=-1, verbose=2)
-    clf.fit(X_, y)
-    print(clf.best_estimator_)
-    print(clf.best_score_)
-
 if __name__ == '__main__':
-    #test()
-    #grid_search()
     submission()

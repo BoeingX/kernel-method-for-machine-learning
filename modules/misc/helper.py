@@ -24,7 +24,7 @@ def pdist(X, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
     elif kernel == 'linear':
         return np.dot(X, X.T)
     elif kernel == 'polynomial':
-        pass
+        return (gamma*np.dot(X, X.T) + coef0)**degree
     else:
         K = np.empty((n, n))
         if kernel == 'laplacian':
@@ -51,7 +51,7 @@ def cdist(X, Y, kernel = 'rbf', gamma = 1.0, degree = 3, coef0 = 1.0):
     elif kernel == 'linear':
         return np.dot(X, Y.T)
     elif kernel == 'polynomial':
-        pass
+        return (gamma*np.dot(X, Y.T) + coef0)**degree
     else:
         K = np.empty((n1, n2))
         if kernel == 'laplacian':
